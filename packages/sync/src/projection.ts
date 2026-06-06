@@ -1,7 +1,7 @@
-import { computeIndividualDive } from '@aquameet/domain';
-import type { IndividualDiveResult } from '@aquameet/domain';
+import { computeIndividualDive, computeSynchroDive } from '@aquameet/domain';
+import type { IndividualDiveResult, SynchroDiveResult } from '@aquameet/domain';
 import type { DiveKind } from './events';
-import type { DiveStatus, SessionState } from './state';
+import type { DiveRecord, DiveStatus, SessionState } from './state';
 
 export interface DiveProjection {
   diveId: string;
@@ -10,9 +10,13 @@ export interface DiveProjection {
   status: DiveStatus;
   /** Number of scores received so far. */
   scoreCount: number;
-  /** Computed once a full panel of scores is present. */
+  /** Official dive score, once computed (individual or synchro). */
+  score?: number;
+  /** Detail for an individual dive. */
   result?: IndividualDiveResult;
-  /** True while awaiting scores or for kinds not yet projected (e.g. synchro). */
+  /** Detail for a synchronised dive. */
+  synchroResult?: SynchroDiveResult;
+  /** True while awaiting a full panel of scores. */
   pending: boolean;
 }
 
@@ -32,8 +36,8 @@ export interface SessionProjection {
  * always recomputed from the event-sourced state (never patched in place), so
  * any runtime that has the same events produces the same projection.
  *
- * Individual dives are fully projected; synchro projection is a follow-up
- * (`pending` stays true) once the panel-role layout lands in the reducer.
+ * Both individual and synchronised dives are fully projected once their full
+ * panel of scores is present.
  */
 export function project(state: SessionState): SessionProjection {
   const dives: DiveProjection[] = [];
@@ -52,12 +56,23 @@ export function project(state: SessionState): SessionProjection {
       pending: true,
     };
 
-    if (dive.kind === 'individual' && values.length === dive.panelSize) {
-      const result = computeIndividualDive(values, dive.dd, { retain: dive.retain });
-      projection.result = result;
-      projection.pending = false;
+    if (values.length === dive.panelSize) {
+      if (dive.kind === 'individual') {
+        const result = computeIndividualDive(values, dive.dd, { retain: dive.retain });
+        projection.result = result;
+        projection.score = result.score;
+        projection.pending = false;
+      } else if (dive.kind === 'synchro' && dive.synchroLayout) {
+        const result = computeSynchroDive(synchroPanels(dive), dive.dd);
+        projection.synchroResult = result;
+        projection.score = result.score;
+        projection.pending = false;
+      }
+    }
+
+    if (!projection.pending && projection.score !== undefined) {
       const acc = totals.get(dive.entryId) ?? { total: 0, scoredDives: 0 };
-      acc.total = roundTotal(acc.total + result.score);
+      acc.total = roundTotal(acc.total + projection.score);
       acc.scoredDives += 1;
       totals.set(dive.entryId, acc);
     }
@@ -74,4 +89,16 @@ export function project(state: SessionState): SessionProjection {
 
 function roundTotal(value: number): number {
   return Math.round(value * 100) / 100;
+}
+
+/** Gather the three synchro panels' scores from a dive's seat-role layout. */
+function synchroPanels(dive: DiveRecord) {
+  const layout = dive.synchroLayout!;
+  const pick = (seats: number[]): number[] =>
+    seats.map((s) => dive.scores[s]).filter((v): v is number => v !== undefined);
+  return {
+    executionA: pick(layout.executionASeats),
+    executionB: pick(layout.executionBSeats),
+    synchronisation: pick(layout.synchronisationSeats),
+  };
 }

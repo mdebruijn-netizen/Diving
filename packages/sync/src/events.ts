@@ -15,6 +15,13 @@ export type PanelSeat = number;
 
 export type DiveKind = 'individual' | 'synchro';
 
+/** Which panel seats judge execution-A, execution-B and synchronisation. */
+export interface SynchroLayout {
+  executionASeats: PanelSeat[];
+  executionBSeats: PanelSeat[];
+  synchronisationSeats: PanelSeat[];
+}
+
 /** Discriminated union of scoring commands (the event payloads). */
 export type ScoringEvent =
   | { type: 'AssignSeat'; panelSeat: PanelSeat; judgeId: string }
@@ -28,6 +35,8 @@ export type ScoringEvent =
       panelSize: number;
       /** Middle scores retained (defaults to RulePack value at projection time). */
       retain?: number;
+      /** Required for synchro dives: maps panel seats to their judging role. */
+      synchro?: SynchroLayout;
     }
   | { type: 'SubmitScore'; diveId: string; panelSeat: PanelSeat; value: number }
   | { type: 'CorrectScore'; diveId: string; panelSeat: PanelSeat; value: number; reason: string }

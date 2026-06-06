@@ -8,7 +8,8 @@
       "@aquameet/sync": ["packages/sync/src/index.ts"],
       "@aquameet/entitlements": ["packages/entitlements/src/index.ts"],
       "@aquameet/competition": ["packages/competition/src/index.ts"],
-      "@aquameet/infoboard": ["packages/infoboard/src/index.ts"]
+      "@aquameet/infoboard": ["packages/infoboard/src/index.ts"],
+      "@aquameet/control-plane": ["packages/control-plane/src/index.ts"]
     }
   },
   "include": ["packages/*/src/**/*.ts"]

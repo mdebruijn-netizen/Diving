@@ -55,6 +55,12 @@ importers:
         specifier: workspace:*
         version: link:../rule-packs
 
+  packages/control-plane:
+    dependencies:
+      '@aquameet/entitlements':
+        specifier: workspace:*
+        version: link:../entitlements
+
   packages/domain: {}
 
   packages/entitlements: {}

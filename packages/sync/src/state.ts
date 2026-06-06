@@ -1,4 +1,4 @@
-import type { DiveKind, PanelSeat } from './events';
+import type { DiveKind, PanelSeat, SynchroLayout } from './events';
 
 export type DiveStatus = 'OPEN' | 'LOCKED';
 
@@ -10,6 +10,8 @@ export interface DiveRecord {
   panelSize: number;
   retain?: number;
   status: DiveStatus;
+  /** Seat-role layout for synchro dives. */
+  synchroLayout?: SynchroLayout;
   /** seat index -> raw score (0–10). Plain object so state is JSON/DO-storable. */
   scores: Record<PanelSeat, number>;
 }

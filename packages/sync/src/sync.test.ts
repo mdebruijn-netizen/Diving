@@ -110,6 +110,35 @@ describe('scoring reducer', () => {
     expect(state.dives.d1?.scores[0]).toBe(8);
   });
 
+  it('projects a synchronised dive through the event log (56.16)', () => {
+    reset();
+    // 11-judge synchro: seats 0–2 execution-A, 3–5 execution-B, 6–10 synchronisation.
+    const open = env({
+      type: 'OpenDive',
+      diveId: 's1',
+      entryId: 'pairA',
+      kind: 'synchro',
+      dd: 2.4,
+      panelSize: 11,
+      synchro: {
+        executionASeats: [0, 1, 2],
+        executionBSeats: [3, 4, 5],
+        synchronisationSeats: [6, 7, 8, 9, 10],
+      },
+    });
+    const scores = [7.5, 8.0, 8.5, 7.0, 7.5, 8.0, 7.0, 8.0, 7.5, 8.0, 8.5];
+    const log: EventEnvelope[] = [
+      open,
+      ...scores.map((value, seat) =>
+        env({ type: 'SubmitScore', diveId: 's1', panelSeat: seat, value }, { role: 'referee' }),
+      ),
+    ];
+    const { dives } = project(reduceAll('1', log));
+    expect(dives[0]?.pending).toBe(false);
+    expect(dives[0]?.synchroResult?.score).toBe(56.16);
+    expect(dives[0]?.score).toBe(56.16);
+  });
+
   it('ranks entries by total score, highest first', () => {
     reset();
     const dive = (id: string, entry: string, base: number) => [

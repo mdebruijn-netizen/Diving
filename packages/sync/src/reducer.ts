@@ -40,6 +40,7 @@ function applyEvent(draft: SessionState, env: EventEnvelope): void {
         panelSize: ev.panelSize,
         retain: ev.retain,
         status: 'OPEN',
+        synchroLayout: ev.synchro,
         scores: {},
       };
       draft.diveOrder.push(ev.diveId);
