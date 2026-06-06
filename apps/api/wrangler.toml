@@ -1,0 +1,12 @@
+name = "aquameet-api"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+
+# Per-session live scoring rooms.
+[[durable_objects.bindings]]
+name = "SESSIONS"
+class_name = "SessionDO"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["SessionDO"]

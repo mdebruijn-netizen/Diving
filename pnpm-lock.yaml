@@ -21,6 +21,25 @@ importers:
         specifier: ^3.0.5
         version: 3.2.6(@types/node@22.19.20)
 
+  apps/api:
+    dependencies:
+      '@aquameet/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@aquameet/entitlements':
+        specifier: workspace:*
+        version: link:../../packages/entitlements
+      '@aquameet/sync':
+        specifier: workspace:*
+        version: link:../../packages/sync
+      hono:
+        specifier: ^4.6.14
+        version: 4.12.23
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20240909.0
+        version: 4.20260606.1
+
   packages/domain: {}
 
   packages/entitlements: {}
@@ -41,6 +60,9 @@ importers:
         version: link:../domain
 
 packages:
+
+  '@cloudflare/workers-types@4.20260606.1':
+    resolution: {integrity: sha512-0FFUsixapowVJcAjRlXLb6UEZG1caUlSuUX1KHhKgWgjKxq20dY5XeCS5lKPqgc80XJ9puwffJ2H1U6Fwr5N1g==}
 
   '@esbuild/aix-ppc64@0.27.7':
     resolution: {integrity: sha512-EKX3Qwmhz1eMdEJokhALr0YiD0lhQNwDqkPYyPhiSwKrh7/4KRjQc04sZ8db+5DVVnZ1LmbNDI1uAMPEUBnQPg==}
@@ -442,6 +464,10 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
+  hono@4.12.23:
+    resolution: {integrity: sha512-eIaZ9qDgu7XV0pxOCrg7/WhnQ6Ivm22UcxhXx/A3dcbqbbYgBEkc6e/J/s7j2tS96zoB0S9VBdLwQNCWwUo4LA==}
+    engines: {node: '>=16.9.0'}
+
   js-tokens@9.0.1:
     resolution: {integrity: sha512-mxa9E9ITFOt0ban3j6L5MpjwegGz6lBQmM1IJkWeBZGcMxto50+eWdjC/52xDbS2vy0k7vIMK0Fe2wfL9OQSpQ==}
 
@@ -613,6 +639,8 @@ packages:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
+
+  '@cloudflare/workers-types@4.20260606.1': {}
 
   '@esbuild/aix-ppc64@0.27.7':
     optional: true
@@ -891,6 +919,8 @@ snapshots:
 
   fsevents@2.3.3:
     optional: true
+
+  hono@4.12.23: {}
 
   js-tokens@9.0.1: {}
 
