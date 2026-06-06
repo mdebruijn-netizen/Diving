@@ -51,12 +51,21 @@ importers:
 
   apps/api:
     dependencies:
+      '@aquameet/competition':
+        specifier: workspace:*
+        version: link:../../packages/competition
+      '@aquameet/control-plane':
+        specifier: workspace:*
+        version: link:../../packages/control-plane
       '@aquameet/domain':
         specifier: workspace:*
         version: link:../../packages/domain
       '@aquameet/entitlements':
         specifier: workspace:*
         version: link:../../packages/entitlements
+      '@aquameet/persistence':
+        specifier: workspace:*
+        version: link:../../packages/persistence
       '@aquameet/sync':
         specifier: workspace:*
         version: link:../../packages/sync
@@ -147,6 +156,15 @@ importers:
   packages/entitlements: {}
 
   packages/infoboard: {}
+
+  packages/persistence:
+    dependencies:
+      '@aquameet/competition':
+        specifier: workspace:*
+        version: link:../competition
+      '@aquameet/control-plane':
+        specifier: workspace:*
+        version: link:../control-plane
 
   packages/rule-packs:
     dependencies:

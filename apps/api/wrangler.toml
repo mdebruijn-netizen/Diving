@@ -10,3 +10,9 @@ class_name = "SessionDO"
 [[migrations]]
 tag = "v1"
 new_classes = ["SessionDO"]
+
+# Tenant database. Apply packages/persistence SCHEMA_SQL on provisioning.
+[[d1_databases]]
+binding = "DB"
+database_name = "aquameet"
+database_id = "00000000-0000-0000-0000-000000000000"
