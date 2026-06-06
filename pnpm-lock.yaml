@@ -59,6 +59,8 @@ importers:
 
   packages/entitlements: {}
 
+  packages/infoboard: {}
+
   packages/rule-packs:
     dependencies:
       '@aquameet/domain':

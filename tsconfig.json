@@ -7,7 +7,8 @@
       "@aquameet/rule-packs": ["packages/rule-packs/src/index.ts"],
       "@aquameet/sync": ["packages/sync/src/index.ts"],
       "@aquameet/entitlements": ["packages/entitlements/src/index.ts"],
-      "@aquameet/competition": ["packages/competition/src/index.ts"]
+      "@aquameet/competition": ["packages/competition/src/index.ts"],
+      "@aquameet/infoboard": ["packages/infoboard/src/index.ts"]
     }
   },
   "include": ["packages/*/src/**/*.ts"]
