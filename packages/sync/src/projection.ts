@@ -58,12 +58,15 @@ export function project(state: SessionState): SessionProjection {
 
     if (values.length === dive.panelSize) {
       if (dive.kind === 'individual') {
-        const result = computeIndividualDive(values, dive.dd, { retain: dive.retain });
+        const result = computeIndividualDive(values, dive.dd, {
+          retain: dive.retain,
+          penalty: dive.penalty,
+        });
         projection.result = result;
         projection.score = result.score;
         projection.pending = false;
       } else if (dive.kind === 'synchro' && dive.synchroLayout) {
-        const result = computeSynchroDive(synchroPanels(dive), dive.dd);
+        const result = computeSynchroDive(synchroPanels(dive), dive.dd, { penalty: dive.penalty });
         projection.synchroResult = result;
         projection.score = result.score;
         projection.pending = false;

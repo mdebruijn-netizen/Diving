@@ -139,6 +139,20 @@ describe('scoring reducer', () => {
     expect(dives[0]?.score).toBe(56.16);
   });
 
+  it('applies a referee balk declared through the event log (66.00 -> 48.00)', () => {
+    reset();
+    const scores = [7.0, 8.0, 7.5, 6.5, 8.5, 7.5, 7.0];
+    const log: EventEnvelope[] = [
+      env({ type: 'OpenDive', diveId: 'd1', entryId: 'A', kind: 'individual', dd: 3.0, panelSize: 7 }),
+      ...scores.map((value, seat) =>
+        env({ type: 'SubmitScore', diveId: 'd1', panelSeat: seat, value }, { role: 'referee' }),
+      ),
+      env({ type: 'DeclarePenalty', diveId: 'd1', penalty: { type: 'balk' } }, { role: 'referee' }),
+    ];
+    const { dives } = project(reduceAll('1', log));
+    expect(dives[0]?.score).toBe(48.0);
+  });
+
   it('ranks entries by total score, highest first', () => {
     reset();
     const dive = (id: string, entry: string, base: number) => [

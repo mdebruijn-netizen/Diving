@@ -7,6 +7,7 @@
  * always recomputed, the venue hub, the Session Durable Object and every client
  * converge on byte-identical results.
  */
+import type { PenaltyModifier } from '@aquameet/domain';
 
 export type ActorRole = 'judge' | 'recorder' | 'referee' | 'organiser' | 'system';
 
@@ -42,6 +43,7 @@ export type ScoringEvent =
   | { type: 'CorrectScore'; diveId: string; panelSeat: PanelSeat; value: number; reason: string }
   | { type: 'LockDive'; diveId: string }
   | { type: 'UnlockDive'; diveId: string; reason: string }
+  | { type: 'DeclarePenalty'; diveId: string; penalty: PenaltyModifier }
   | { type: 'SetManualMode'; on: boolean };
 
 export type ScoringEventType = ScoringEvent['type'];

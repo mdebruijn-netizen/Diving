@@ -31,6 +31,21 @@ describe('computeIndividualDive (World Aquatics individual)', () => {
     expect(() => computeIndividualDive([7, 7, 7], 0)).toThrow(/dd/);
   });
 
+  it('applies a balk: 2 points off every judge (66.00 -> 48.00)', () => {
+    const r = computeIndividualDive([7.0, 8.0, 7.5, 6.5, 8.5, 7.5, 7.0], 3.0, {
+      penalty: { type: 'balk' },
+    });
+    // adjusted [5,6,5.5,4.5,6.5,5.5,5] -> retained [5,5.5,5.5] = 16 * 3.0
+    expect(r.award).toBe(16.0);
+    expect(r.score).toBe(48.0);
+  });
+
+  it('scores a failed dive as 0', () => {
+    const r = computeIndividualDive([8, 8, 8], 3.0, { penalty: { type: 'failed' } });
+    expect(r.score).toBe(0);
+    expect(r.award).toBe(0);
+  });
+
   it('property: the score is invariant under permutation of the raw scores', () => {
     fc.assert(
       fc.property(

@@ -1,5 +1,5 @@
-import type { RoundingConfig } from '../types';
-import { DEFAULT_ROUNDING } from '../types';
+import type { PenaltyModifier, RoundingConfig } from '../types';
+import { DEFAULT_ROUNDING, perJudgeDeduction } from '../types';
 import { dropAndRetain, sum } from './drop';
 import { roundScore } from './rounding';
 
@@ -13,6 +13,8 @@ export interface IndividualScoreOptions {
    * 3-judge equivalent. Override only for non-standard federations.
    */
   normalizeFactor?: number;
+  /** Referee ruling that modifies the score (balk, failed, deduction). */
+  penalty?: PenaltyModifier;
 }
 
 export interface IndividualDiveResult {
@@ -42,10 +44,14 @@ export function computeIndividualDive(
   }
   const retain = options.retain ?? 3;
   const rounding = options.rounding ?? DEFAULT_ROUNDING;
-  const { retained, droppedLow, droppedHigh } = dropAndRetain(rawScores, retain);
-  const award = sum(retained);
+  // A balk/deduction lowers every judge's score (floored at 0) before the drop.
+  const deduction = perJudgeDeduction(options.penalty);
+  const adjusted = deduction > 0 ? rawScores.map((s) => Math.max(0, s - deduction)) : rawScores;
+  const { retained, droppedLow, droppedHigh } = dropAndRetain(adjusted, retain);
+  const failed = options.penalty?.type === 'failed';
+  const award = failed ? 0 : sum(retained);
   const normalizeFactor = options.normalizeFactor ?? 3 / retain;
-  const score = roundScore(award * normalizeFactor * dd, rounding);
+  const score = failed ? 0 : roundScore(award * normalizeFactor * dd, rounding);
   return {
     rawScores: [...rawScores],
     retained,

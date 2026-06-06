@@ -1,3 +1,4 @@
+import type { PenaltyModifier } from '@aquameet/domain';
 import type { DiveKind, PanelSeat, SynchroLayout } from './events';
 
 export type DiveStatus = 'OPEN' | 'LOCKED';
@@ -12,6 +13,8 @@ export interface DiveRecord {
   status: DiveStatus;
   /** Seat-role layout for synchro dives. */
   synchroLayout?: SynchroLayout;
+  /** Referee penalty applied to this dive, if any. */
+  penalty?: PenaltyModifier;
   /** seat index -> raw score (0–10). Plain object so state is JSON/DO-storable. */
   scores: Record<PanelSeat, number>;
 }

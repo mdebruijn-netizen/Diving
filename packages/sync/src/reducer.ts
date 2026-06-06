@@ -85,6 +85,13 @@ function applyEvent(draft: SessionState, env: EventEnvelope): void {
       dive.status = 'OPEN';
       return;
     }
+    case 'DeclarePenalty': {
+      const dive = draft.dives[ev.diveId];
+      if (!dive) return reject(draft, env, `unknown dive ${ev.diveId}`);
+      if (!privileged) return reject(draft, env, `DeclarePenalty requires recorder/referee`);
+      dive.penalty = ev.penalty;
+      return;
+    }
     case 'SetManualMode': {
       if (!privileged) return reject(draft, env, `SetManualMode requires recorder/referee`);
       draft.manualMode = ev.on;
