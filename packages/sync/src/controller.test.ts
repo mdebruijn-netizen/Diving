@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import type { EventEnvelope, ScoringEvent } from '@aquameet/sync';
-import { SessionController } from './session-controller';
+import type { EventEnvelope, ScoringEvent } from './events';
+import { SessionController } from './controller';
 
 let seq = 0;
 function env(event: ScoringEvent, role: EventEnvelope['actorRole'] = 'recorder'): EventEnvelope {

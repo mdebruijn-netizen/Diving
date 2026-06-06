@@ -1,6 +1,6 @@
 import type { EventEnvelope } from '@aquameet/sync';
+import { SessionController } from '@aquameet/sync';
 import type { Env } from './env';
-import { SessionController } from './session-controller';
 
 /**
  * Session Durable Object — the live scoring room (plan Deel 2 §F).

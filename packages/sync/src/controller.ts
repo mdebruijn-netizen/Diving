@@ -1,5 +1,9 @@
-import { initialSessionState, project, reduce } from '@aquameet/sync';
-import type { EventEnvelope, SessionProjection, SessionState } from '@aquameet/sync';
+import type { EventEnvelope } from './events';
+import type { SessionProjection } from './projection';
+import type { SessionState } from './state';
+import { initialSessionState } from './state';
+import { project } from './projection';
+import { reduce } from './reducer';
 
 export interface AppendResult {
   accepted: boolean;
@@ -8,9 +12,9 @@ export interface AppendResult {
 
 /**
  * Runtime-agnostic session controller: folds the scoring event log into state
- * and exposes the recomputed projection. It depends only on the pure
- * `@aquameet/sync` package (no Cloudflare APIs), so it is unit-tested in Node
- * and reused unchanged inside the Session Durable Object.
+ * and exposes the recomputed projection. It depends only on this pure package
+ * (no Cloudflare or Node APIs), so it is unit-tested directly and reused
+ * unchanged inside the Session Durable Object (cloud) and the venue hub (LAN).
  */
 export class SessionController {
   private state: SessionState;

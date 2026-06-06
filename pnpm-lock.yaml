@@ -40,6 +40,15 @@ importers:
         specifier: ^4.20240909.0
         version: 4.20260606.1
 
+  apps/venue-hub:
+    dependencies:
+      '@aquameet/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@aquameet/sync':
+        specifier: workspace:*
+        version: link:../../packages/sync
+
   packages/domain: {}
 
   packages/entitlements: {}
