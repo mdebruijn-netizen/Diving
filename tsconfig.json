@@ -5,7 +5,8 @@
     "paths": {
       "@aquameet/domain": ["packages/domain/src/index.ts"],
       "@aquameet/rule-packs": ["packages/rule-packs/src/index.ts"],
-      "@aquameet/sync": ["packages/sync/src/index.ts"]
+      "@aquameet/sync": ["packages/sync/src/index.ts"],
+      "@aquameet/entitlements": ["packages/entitlements/src/index.ts"]
     }
   },
   "include": ["packages/*/src/**/*.ts"]

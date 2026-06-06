@@ -23,6 +23,8 @@ importers:
 
   packages/domain: {}
 
+  packages/entitlements: {}
+
   packages/rule-packs:
     dependencies:
       '@aquameet/domain':
