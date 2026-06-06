@@ -49,6 +49,12 @@ importers:
         specifier: workspace:*
         version: link:../../packages/sync
 
+  packages/competition:
+    dependencies:
+      '@aquameet/rule-packs':
+        specifier: workspace:*
+        version: link:../rule-packs
+
   packages/domain: {}
 
   packages/entitlements: {}
