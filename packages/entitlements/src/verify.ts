@@ -1,14 +1,7 @@
-import { base64ToBytes, canonicalJson } from './canonical';
+import { base64ToBytes, canonicalJson, toArrayBufferView } from './canonical';
 import type { SignedEntitlement } from './types';
 
 const ED25519 = { name: 'Ed25519' } as const;
-
-/** Copy into a fresh ArrayBuffer-backed view (Web Crypto requires non-shared). */
-function toArrayBufferView(bytes: Uint8Array): Uint8Array<ArrayBuffer> {
-  const copy = new Uint8Array(bytes.byteLength);
-  copy.set(bytes);
-  return copy;
-}
 
 /**
  * Verify a signed entitlement document against a raw Ed25519 public key.

@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { adminRoutes } from './admin-routes';
+import { stripeWebhook } from './stripe-webhook';
 import type { Env } from './env';
 
 export { SessionDO } from './session-do';
@@ -9,6 +10,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.get('/health', (c) => c.json({ ok: true, service: 'aquameet-api' }));
 
 app.route('/admin', adminRoutes);
+app.route('/webhooks', stripeWebhook);
 
 /**
  * All session traffic (live WebSocket, event POSTs, projection reads) is routed

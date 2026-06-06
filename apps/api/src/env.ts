@@ -3,4 +3,6 @@ export interface Env {
   SESSIONS: DurableObjectNamespace;
   /** Tenant database (competition entities, entries, dive sheets). */
   DB: D1Database;
+  /** Stripe webhook endpoint secret. */
+  STRIPE_WEBHOOK_SECRET: string;
 }
