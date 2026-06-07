@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Card, EmptyState, Field, Logo } from '@aquameet/ui';
 import type { Category, Competition, DiveSheet, Diver, Entry, Gender } from '@aquameet/competition';
+import { formatDateRange } from '@aquameet/competition';
 import { publicApi, newId } from './public-api';
 import { parseSheetInput, validateSheet, type Discipline } from './sheet';
 
 const SHELL: React.CSSProperties = { maxWidth: 760, margin: '0 auto', padding: '40px 20px' };
 
-type OpenCompetition = Pick<Competition, 'id' | 'name' | 'date' | 'location' | 'registrationDeadline'>;
+type OpenCompetition = Pick<Competition, 'id' | 'name' | 'date' | 'endDate' | 'location' | 'registrationDeadline'>;
 
 /* ---------------- Join: pick a competition and register ---------------- */
 export function Join() {
@@ -61,7 +62,7 @@ export function Join() {
             <Field label="Competition">
               <select value={competitionId} onChange={(e) => setCompetitionId(e.target.value)}>
                 <option value="">— choose competition —</option>
-                {comps.map((w) => <option key={w.id} value={w.id}>{w.name} · {w.date}{w.location ? ` · ${w.location}` : ''}</option>)}
+                {comps.map((w) => <option key={w.id} value={w.id}>{w.name} · {formatDateRange(w.date, w.endDate)}{w.location ? ` · ${w.location}` : ''}</option>)}
               </select>
             </Field>
             <Field label="Contact name"><input value={contactName} onChange={(e) => setContactName(e.target.value)} /></Field>
@@ -115,7 +116,7 @@ export function RegistrationPage({ token }: { token: string }) {
       <Card title={data.competition?.name ?? 'Registration'}>
         <p className="muted" style={{ marginTop: 0 }}>
           {data.registration.clubName ? `${data.registration.clubName} · ` : ''}{data.registration.contactName}
-          {data.competition?.date ? ` · ${data.competition.date}` : ''}
+          {data.competition?.date ? ` · ${formatDateRange(data.competition.date, data.competition.endDate)}` : ''}
         </p>
         {locked ? <p>Your registration has been submitted. Changes are no longer possible.</p> : null}
       </Card>

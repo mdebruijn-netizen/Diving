@@ -12,8 +12,10 @@ export type Gender = 'M' | 'F' | 'X';
 export interface Competition {
   id: string;
   name: string;
-  /** ISO date (YYYY-MM-DD). */
+  /** ISO start date (YYYY-MM-DD). Single-day meets only set this. */
   date: string;
+  /** ISO end date (YYYY-MM-DD) for multi-day meets; omit/equal to `date` for one day. */
+  endDate?: string;
   location?: string;
   /** Whether clubs/divers can self-register for this competition. */
   registrationOpen?: boolean;

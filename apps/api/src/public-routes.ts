@@ -23,7 +23,7 @@ publicRoutes.get('/competitions', async (c) => {
   return c.json(
     all
       .filter((w) => w.registrationOpen)
-      .map((w) => ({ id: w.id, name: w.name, date: w.date, location: w.location, registrationDeadline: w.registrationDeadline })),
+      .map((w) => ({ id: w.id, name: w.name, date: w.date, endDate: w.endDate, location: w.location, registrationDeadline: w.registrationDeadline })),
   );
 });
 

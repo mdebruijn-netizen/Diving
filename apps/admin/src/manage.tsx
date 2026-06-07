@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Badge, Button, Card, EmptyState, Field } from '@aquameet/ui';
 import type { Category, Competition, DiveSheet, Diver, Entry, Gender, Registration } from '@aquameet/competition';
+import { formatDateRange } from '@aquameet/competition';
 import { api, newId, useCollection } from './api';
 import { DISCIPLINES, validateSheet, type Discipline } from './view-model';
 
@@ -14,14 +15,22 @@ export function Competitions() {
   const { items, refresh, loading, error } = useCollection<Competition>('/competitions');
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [location, setLocation] = useState('');
 
   const add = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     const id = newId();
-    await api.put(`/competitions/${id}`, { id, name: name.trim(), date: date || new Date().toISOString().slice(0, 10), location: location.trim() || undefined });
-    setName(''); setDate(''); setLocation('');
+    const start = date || new Date().toISOString().slice(0, 10);
+    await api.put(`/competitions/${id}`, {
+      id,
+      name: name.trim(),
+      date: start,
+      endDate: endDate && endDate !== start ? endDate : undefined,
+      location: location.trim() || undefined,
+    });
+    setName(''); setDate(''); setEndDate(''); setLocation('');
     refresh();
   };
 
@@ -40,9 +49,10 @@ export function Competitions() {
           <form className="col" onSubmit={add}>
             <Field label="Name"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Spring Meet 2026" /></Field>
             <div className="grid cols-2">
-              <Field label="Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
-              <Field label="Location"><input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Pool…" /></Field>
+              <Field label="Start date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
+              <Field label="End date" hint="Leave empty for a one-day meet"><input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} /></Field>
             </div>
+            <Field label="Location"><input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Pool…" /></Field>
             <Button type="submit" icon="plus">Add competition</Button>
           </form>
         </Card>
@@ -53,12 +63,12 @@ export function Competitions() {
             <EmptyState icon="trophy" title="No competitions yet" description="Add your first competition on the left." />
           ) : (
             <table className="table">
-              <thead><tr><th>Name</th><th>Date</th><th>Registration</th><th></th></tr></thead>
+              <thead><tr><th>Name</th><th>Dates</th><th>Registration</th><th></th></tr></thead>
               <tbody>
                 {items.map((w) => (
                   <tr key={w.id}>
                     <td><b>{w.name}</b><br /><span className="muted">{w.location ?? '—'}</span></td>
-                    <td className="mono">{w.date}</td>
+                    <td className="mono">{formatDateRange(w.date, w.endDate)}</td>
                     <td>{w.registrationOpen ? <Badge tone="good">open</Badge> : <Badge tone="neutral">closed</Badge>}</td>
                     <td style={{ textAlign: 'right' }}>
                       <Button onClick={() => toggleReg(w)}>{w.registrationOpen ? 'Close' : 'Open'}</Button>{' '}
