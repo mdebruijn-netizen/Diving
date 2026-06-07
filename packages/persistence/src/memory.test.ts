@@ -18,6 +18,16 @@ describe('InMemoryDatabase', () => {
     expect(await db.categories.get('c1')).toBeUndefined();
   });
 
+  it('stores competitions and queries categories by competition', async () => {
+    const db = new InMemoryDatabase();
+    await db.competitions.put('w1', { id: 'w1', name: 'Voorjaar', date: '2026-04-01' });
+    expect((await db.competitions.get('w1'))?.name).toBe('Voorjaar');
+    await db.categories.put('c1', { ...category('c1'), competitionId: 'w1' });
+    await db.categories.put('c2', { ...category('c2'), competitionId: 'w9' });
+    const inW1 = await db.categories.byCompetition('w1');
+    expect(inW1.map((c) => c.id)).toEqual(['c1']);
+  });
+
   it('queries entries by category', async () => {
     const db = new InMemoryDatabase();
     await db.entries.put('e1', entry('e1', 'cat-A'));

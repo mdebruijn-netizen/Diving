@@ -1,6 +1,6 @@
-import type { Category, Club, DiveSheet, Diver, Entry } from '@aquameet/competition';
+import type { Category, Club, Competition, DiveSheet, Diver, Entry } from '@aquameet/competition';
 import type { Subscription } from '@aquameet/control-plane';
-import type { Collection, Database, EntryStore, SheetStore } from '@aquameet/persistence';
+import type { CategoryStore, Collection, Database, EntryStore, SheetStore } from '@aquameet/persistence';
 
 /**
  * D1-backed implementation of the `@aquameet/persistence` Database contract.
@@ -65,6 +65,20 @@ class D1EntryStore extends D1Collection<Entry> implements EntryStore {
   }
 }
 
+class D1CategoryStore extends D1Collection<Category> implements CategoryStore {
+  constructor(db: D1Database) {
+    super(db, 'categories');
+  }
+
+  async byCompetition(competitionId: string): Promise<Category[]> {
+    const res = await this.db
+      .prepare("SELECT data FROM categories WHERE json_extract(data, '$.competitionId') = ?")
+      .bind(competitionId)
+      .all<{ data: string }>();
+    return res.results.map((r) => JSON.parse(r.data) as Category);
+  }
+}
+
 class D1SheetStore implements SheetStore {
   constructor(private readonly db: D1Database) {}
 
@@ -88,17 +102,19 @@ class D1SheetStore implements SheetStore {
 }
 
 export class D1AppDatabase implements Database {
+  readonly competitions: Collection<Competition>;
   readonly clubs: Collection<Club>;
   readonly divers: Collection<Diver>;
-  readonly categories: Collection<Category>;
+  readonly categories: CategoryStore;
   readonly entries: EntryStore;
   readonly sheets: SheetStore;
   readonly subscriptions: Collection<Subscription>;
 
   constructor(db: D1Database) {
+    this.competitions = new D1Collection<Competition>(db, 'competitions');
     this.clubs = new D1Collection<Club>(db, 'clubs');
     this.divers = new D1Collection<Diver>(db, 'divers');
-    this.categories = new D1Collection<Category>(db, 'categories');
+    this.categories = new D1CategoryStore(db);
     this.entries = new D1EntryStore(db);
     this.sheets = new D1SheetStore(db);
     this.subscriptions = new D1Collection<Subscription>(db, 'subscriptions');

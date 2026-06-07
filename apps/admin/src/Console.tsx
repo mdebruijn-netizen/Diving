@@ -1,6 +1,7 @@
 import { AppShell, type NavItem } from '@aquameet/ui';
 import { useHashRoute, type Session } from './auth';
 import { Dashboard, Stub, Validate } from './screens';
+import { Categories, Competitions, Participants } from './manage';
 
 const NAV: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '#/' },
@@ -22,11 +23,11 @@ export function Console({ session, onSignOut }: { session: Session; onSignOut: (
       case 'sheets':
         return <Validate />;
       case 'events':
-        return <Stub title="Wedstrijden" icon="trophy" cta="Nieuwe wedstrijd" description="Maak wedstrijden aan met datum, locatie en onderdelen. Dit scherm koppelt aan de opslag-API." />;
+        return <Competitions />;
       case 'participants':
-        return <Stub title="Deelnemers" icon="users" cta="Deelnemer toevoegen" description="Beheer divers en clubs, met import en inschrijvingen per categorie." />;
+        return <Participants />;
       case 'categories':
-        return <Stub title="Categorieën" icon="layers" cta="Categorie toevoegen" description="Stel categorieën in (geslacht × leeftijdsgroep × onderdeel) en hun regels." />;
+        return <Categories />;
       case 'live':
         return <Stub title="Live bediening" icon="broadcast" description="Open sprongen, volg de jury en stuur het scorebord aan tijdens de wedstrijd." />;
       case 'settings':

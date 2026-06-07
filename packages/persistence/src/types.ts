@@ -1,4 +1,4 @@
-import type { Category, Club, DiveSheet, Diver, Entry } from '@aquameet/competition';
+import type { Category, Club, Competition, DiveSheet, Diver, Entry } from '@aquameet/competition';
 import type { Subscription } from '@aquameet/control-plane';
 
 /**
@@ -18,15 +18,21 @@ export interface EntryStore extends Collection<Entry> {
   byCategory(categoryId: string): Promise<Entry[]>;
 }
 
+export interface CategoryStore extends Collection<Category> {
+  /** Categories belonging to a competition. */
+  byCompetition(competitionId: string): Promise<Category[]>;
+}
+
 export interface SheetStore {
   get(entryId: string): Promise<DiveSheet | undefined>;
   put(sheet: DiveSheet): Promise<void>;
 }
 
 export interface Database {
+  competitions: Collection<Competition>;
   clubs: Collection<Club>;
   divers: Collection<Diver>;
-  categories: Collection<Category>;
+  categories: CategoryStore;
   entries: EntryStore;
   sheets: SheetStore;
   /** Subscriptions keyed by tenantId. */

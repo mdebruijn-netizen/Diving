@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Badge, Button, Card, EmptyState, Field, Icon, Stat, type IconName } from '@aquameet/ui';
+import type { Category, Competition, Diver } from '@aquameet/competition';
 import { DISCIPLINES, type Discipline, parseSheetInput, validateSheet } from './view-model';
+import { useCollection } from './api';
 import type { Session } from './auth';
 
 function go(hash: string) {
@@ -9,6 +11,10 @@ function go(hash: string) {
 
 /* ---------------- Dashboard ---------------- */
 export function Dashboard({ session }: { session: Session }) {
+  const competitions = useCollection<Competition>('/competitions');
+  const divers = useCollection<Diver>('/divers');
+  const categories = useCollection<Category>('/categories');
+
   return (
     <>
       <div className="page-head">
@@ -17,9 +23,9 @@ export function Dashboard({ session }: { session: Session }) {
       </div>
 
       <div className="grid cols-4">
-        <Stat label="Wedstrijden" value="0" hint="Nog geen wedstrijd" icon="trophy" />
-        <Stat label="Deelnemers" value="0" hint="Voeg divers toe" icon="users" />
-        <Stat label="Categorieën" value="0" hint="Geslacht × leeftijd" icon="layers" />
+        <Stat label="Wedstrijden" value={competitions.items.length} hint={competitions.items.length ? 'Beheren' : 'Nog geen wedstrijd'} icon="trophy" />
+        <Stat label="Deelnemers" value={divers.items.length} hint={divers.items.length ? 'Ingeschreven' : 'Voeg divers toe'} icon="users" />
+        <Stat label="Categorieën" value={categories.items.length} hint="Geslacht × leeftijd" icon="layers" />
         <Stat label="Live sessies" value="0" hint="Niets actief" icon="broadcast" />
       </div>
 

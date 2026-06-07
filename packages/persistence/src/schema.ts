@@ -4,6 +4,7 @@
  * `category_id` for entries). One D1 database per tenant (plan ADR 0001).
  */
 export const SCHEMA_SQL = `
+CREATE TABLE IF NOT EXISTS competitions (id TEXT PRIMARY KEY, data TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS clubs (id TEXT PRIMARY KEY, data TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS divers (id TEXT PRIMARY KEY, data TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS categories (id TEXT PRIMARY KEY, data TEXT NOT NULL);

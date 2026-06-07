@@ -8,6 +8,15 @@ import type { DivePosition } from '@aquameet/rule-packs';
 
 export type Gender = 'M' | 'F' | 'X';
 
+/** A competition (the umbrella event), grouping one or more categories/sessions. */
+export interface Competition {
+  id: string;
+  name: string;
+  /** ISO date (YYYY-MM-DD). */
+  date: string;
+  location?: string;
+}
+
 export interface Club {
   id: string;
   name: string;
@@ -44,6 +53,8 @@ export interface Category {
   /** Discipline key matching the RulePack DD table, e.g. "springboard-3m". */
   disciplineId: string;
   rules: CategoryRules;
+  /** Competition this category belongs to. */
+  competitionId?: string;
 }
 
 export interface DiveListItem {

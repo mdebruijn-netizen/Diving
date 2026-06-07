@@ -1,6 +1,6 @@
-import type { Category, Club, DiveSheet, Diver, Entry } from '@aquameet/competition';
+import type { Category, Club, Competition, DiveSheet, Diver, Entry } from '@aquameet/competition';
 import type { Subscription } from '@aquameet/control-plane';
-import type { Collection, Database, EntryStore, SheetStore } from './types';
+import type { CategoryStore, Collection, Database, EntryStore, SheetStore } from './types';
 
 class MemoryCollection<T> implements Collection<T> {
   private readonly map = new Map<string, T>();
@@ -25,6 +25,12 @@ class MemoryEntryStore extends MemoryCollection<Entry> implements EntryStore {
   }
 }
 
+class MemoryCategoryStore extends MemoryCollection<Category> implements CategoryStore {
+  async byCompetition(competitionId: string): Promise<Category[]> {
+    return (await this.all()).filter((c) => c.competitionId === competitionId);
+  }
+}
+
 class MemorySheetStore implements SheetStore {
   private readonly map = new Map<string, DiveSheet>();
 
@@ -38,9 +44,10 @@ class MemorySheetStore implements SheetStore {
 
 /** In-memory Database — for tests, local dev and the venue hub's working set. */
 export class InMemoryDatabase implements Database {
+  readonly competitions = new MemoryCollection<Competition>();
   readonly clubs = new MemoryCollection<Club>();
   readonly divers = new MemoryCollection<Diver>();
-  readonly categories = new MemoryCollection<Category>();
+  readonly categories = new MemoryCategoryStore();
   readonly entries = new MemoryEntryStore();
   readonly sheets = new MemorySheetStore();
   readonly subscriptions = new MemoryCollection<Subscription>();
