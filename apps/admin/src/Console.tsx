@@ -2,13 +2,15 @@ import { AppShell, type NavItem } from '@aquameet/ui';
 import { useHashRoute, type Session } from './auth';
 import { Dashboard, Stub, Validate } from './screens';
 import { Categories, Competitions, Participants } from './manage';
+import { Enrollment } from './enroll';
 
 const NAV: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '#/' },
   { id: 'events', label: 'Wedstrijden', icon: 'trophy', href: '#/events' },
   { id: 'participants', label: 'Deelnemers', icon: 'users', href: '#/participants' },
   { id: 'categories', label: 'Categorieën', icon: 'layers', href: '#/categories' },
-  { id: 'sheets', label: 'Dive sheets', icon: 'clipboard', href: '#/sheets' },
+  { id: 'enroll', label: 'Inschrijvingen', icon: 'clipboard', href: '#/enroll' },
+  { id: 'sheets', label: 'Programma testen', icon: 'clipboard', href: '#/sheets' },
   { id: 'live', label: 'Live', icon: 'broadcast', href: '#/live' },
   { id: 'settings', label: 'Instellingen', icon: 'settings', href: '#/settings' },
 ];
@@ -20,6 +22,8 @@ export function Console({ session, onSignOut }: { session: Session; onSignOut: (
 
   const screen = (() => {
     switch (route) {
+      case 'enroll':
+        return <Enrollment />;
       case 'sheets':
         return <Validate />;
       case 'events':

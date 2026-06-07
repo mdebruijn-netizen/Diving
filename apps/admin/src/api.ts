@@ -15,6 +15,7 @@ async function http<T>(method: string, path: string, body?: unknown): Promise<T>
 
 export const api = {
   list: <T>(path: string) => http<T[]>('GET', path),
+  get: <T>(path: string) => http<T>('GET', path),
   put: (path: string, body: unknown) => http<{ ok: boolean }>('PUT', path, body),
   del: (path: string) => http<{ ok: boolean }>('DELETE', path),
 };

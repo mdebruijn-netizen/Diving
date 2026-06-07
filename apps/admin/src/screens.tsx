@@ -34,7 +34,7 @@ export function Dashboard({ session }: { session: Session }) {
           <div className="col">
             <QuickAction icon="trophy" title="Nieuwe wedstrijd" desc="Datum, locatie en onderdelen instellen." onClick={() => go('#/events')} />
             <QuickAction icon="users" title="Deelnemers toevoegen" desc="Importeer of voeg divers en clubs toe." onClick={() => go('#/participants')} />
-            <QuickAction icon="clipboard" title="Dive sheet controleren" desc="Valideer een sprongenlijst tegen de FINA-tabel." onClick={() => go('#/sheets')} />
+            <QuickAction icon="clipboard" title="Diver inschrijven" desc="Schrijf in met programma — meteen gevalideerd." onClick={() => go('#/enroll')} />
           </div>
         </Card>
 
@@ -103,8 +103,8 @@ export function Validate() {
   return (
     <>
       <div className="page-head">
-        <h1>Dive-sheet validatie</h1>
-        <p>Controleer een sprongenlijst tegen de officiële FINA 2017–2021 DD-tabel — vóór de wedstrijd, niet aan het bad.</p>
+        <h1>Programma testen</h1>
+        <p>Snel een losse sprongenlijst uitproberen tegen de FINA 2017–2021 DD-tabel — handig voor aangepaste of uitzonderingsschema's. Inschrijven doe je onder Inschrijvingen, daar wordt automatisch gevalideerd.</p>
       </div>
 
       <div className="grid cols-2">
