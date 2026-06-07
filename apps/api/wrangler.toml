@@ -2,6 +2,11 @@ name = "aquameet-api"
 main = "src/index.ts"
 compatibility_date = "2026-06-01"
 
+# The three front-ends (web, judge, admin) are built into ./public and served
+# as static assets from this same Worker; unmatched paths fall through to /api.
+[assets]
+directory = "./public"
+
 # Per-session live scoring rooms.
 [[durable_objects.bindings]]
 name = "SESSIONS"

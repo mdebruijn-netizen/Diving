@@ -15,7 +15,9 @@
     "build:web": "pnpm --filter @aquameet/web build",
     "build:judge": "pnpm --filter @aquameet/judge build",
     "build:admin": "pnpm --filter @aquameet/admin build",
-    "build:frontends": "pnpm build:web && pnpm build:judge && pnpm build:admin"
+    "build:frontends": "pnpm build:web && pnpm build:judge && pnpm build:admin",
+    "build:all": "pnpm build:frontends && node scripts/assemble-assets.mjs",
+    "build": "pnpm build:all"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

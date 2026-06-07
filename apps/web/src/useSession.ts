@@ -10,7 +10,7 @@ export function useSession(apiBase: string, sessionId: string): SessionProjectio
   const [projection, setProjection] = useState<SessionProjection | null>(null);
 
   useEffect(() => {
-    const wsUrl = apiBase.replace(/^http/, 'ws') + `/sessions/${sessionId}/live`;
+    const wsUrl = apiBase.replace(/^http/, 'ws') + `/api/sessions/${sessionId}/live`;
     const ws = new WebSocket(wsUrl);
     ws.addEventListener('message', (event) => {
       try {

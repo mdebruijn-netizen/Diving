@@ -1,72 +1,58 @@
-# Deployment (GitHub → Cloudflare)
+# Deployment (Cloudflare Workers Builds)
 
-Every push to `main` runs [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml),
-which type-checks, tests, builds and deploys:
+The whole platform deploys as **one Worker**: the API plus the three front-ends
+(results/scoreboard, judge, admin) served as static assets from the same origin.
+One push to `main` → one build → everything live. No CORS, no separate Pages
+projects, no API token in CI (Workers Builds uses its own build token).
 
-- **`apps/api`** → a Cloudflare **Worker** (with the `SessionDO` Durable Object and the `DB` D1 binding)
-- **`apps/web` / `apps/judge` / `apps/admin`** → Cloudflare **Pages** projects
+## Cloudflare Workers Builds settings
 
-The deploy never sees your token directly — it reads it from GitHub Secrets.
+In the Worker → Settings → Builds (Git integration), set:
 
-## One-time setup
+| Field | Value |
+| --- | --- |
+| Root directory | `/` |
+| Build command | `pnpm run build:all` |
+| Deploy command | `npx wrangler deploy -c apps/api/wrangler.toml` |
 
-You do these once; after that, pushing to `main` deploys automatically.
+`build:all` builds the three front-ends (Vite) and assembles them into
+`apps/api/public/{web,judge,admin}`; `wrangler deploy` bundles the Worker and
+uploads those assets. pnpm is detected from `pnpm-lock.yaml`.
 
-### 1. Create a Cloudflare API token
+## One-time resources
 
-Cloudflare dashboard → My Profile → API Tokens → Create Token. Permissions needed:
+Already done: D1 `aquameet` (`4850f07c-…`) and R2 `aquameet` are bound in
+[`apps/api/wrangler.toml`](../apps/api/wrangler.toml).
 
-- Account · **Workers Scripts** · Edit
-- Account · **D1** · Edit
-- Account · **Cloudflare Pages** · Edit
-- Account · **Workers Durable Objects** · Edit
+1. **Apply the D1 schema** (the database starts empty):
+   ```bash
+   pnpm exec wrangler d1 execute aquameet --remote --file=apps/api/migrations/0001_init.sql
+   ```
+2. **Stripe secret** (only if you use the billing webhook):
+   ```bash
+   cd apps/api && pnpm exec wrangler secret put STRIPE_WEBHOOK_SECRET
+   ```
 
-Note your **Account ID** (Workers & Pages overview page).
+## URLs after deploy
 
-### 2. Add GitHub repository secrets
+Everything is one origin (the Worker), e.g. `https://aquameet-api.<account>.workers.dev`:
 
-Repo → Settings → Secrets and variables → Actions → New repository secret:
+- Public results: `/web/?session=<id>`
+- Scoreboard: `/web/?session=<id>&view=scoreboard`
+- Judge: `/judge/?session=<id>&role=judge&seat=<n>`
+- Recorder: `/judge/?session=<id>&role=recorder`
+- Admin (sheet validation): `/admin/`
+- API: `/api/health`, `/api/sessions/:id/live` (WebSocket), `/api/admin/*`, `/api/webhooks/stripe`
 
-- `CLOUDFLARE_API_TOKEN` — the token from step 1
-- `CLOUDFLARE_ACCOUNT_ID` — your account id
+The front-ends default their API base to the same origin, so no extra config is
+needed. Add a custom domain on the Worker for a friendly URL.
 
-### 3. Create the D1 database (once)
+## Local development
 
 ```bash
-# locally, authenticated with the same token (wrangler login or CLOUDFLARE_API_TOKEN env)
-pnpm exec wrangler d1 create aquameet
+pnpm install
+pnpm run build:all                         # build + assemble assets
+pnpm --filter @aquameet/api exec wrangler dev   # serve API + assets locally
+# or run a front-end on its own dev server:
+pnpm --filter @aquameet/web dev
 ```
-
-Copy the printed `database_id` into [`apps/api/wrangler.toml`](../apps/api/wrangler.toml)
-(replace the placeholder), then apply the schema:
-
-```bash
-pnpm exec wrangler d1 execute aquameet --remote --file=apps/api/migrations/0001_init.sql
-```
-
-### 4. Worker secrets (once)
-
-```bash
-cd apps/api
-pnpm exec wrangler secret put STRIPE_WEBHOOK_SECRET
-```
-
-### 5. Deploy
-
-Merge to `main` (or run the **Deploy** workflow manually via *Actions → Deploy → Run workflow*).
-The Pages projects (`aquameet-web`, `aquameet-judge`, `aquameet-admin`) are created automatically
-on first run.
-
-## Wiring the front-ends to the API
-
-The Pages apps take the API base via the `?api=` query param (defaulting to their own origin).
-Point them at the deployed Worker, e.g. `https://aquameet-web.pages.dev/?session=<id>&api=https://aquameet-api.<account>.workers.dev`.
-For a cleaner setup, add a custom domain / route so the Worker and Pages share an origin.
-
-## Notes
-
-- `pnpm.onlyBuiltDependencies` (root `package.json`) allows `esbuild`/`workerd` build scripts so
-  Vite builds and Wrangler run in CI.
-- Local dev: `pnpm --filter @aquameet/api exec wrangler dev` and `pnpm --filter @aquameet/web dev`.
-- An alternative to GitHub Actions is Cloudflare's native Git integration (Workers Builds + Pages),
-  but Actions keeps the Worker, Durable Object, D1 and three Pages apps in one gated pipeline.

@@ -18,7 +18,7 @@ export function useLiveSession(apiBase: string, sessionId: string): LiveSession 
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const wsUrl = apiBase.replace(/^http/, 'ws') + `/sessions/${sessionId}/live`;
+    const wsUrl = apiBase.replace(/^http/, 'ws') + `/api/sessions/${sessionId}/live`;
     const ws = new WebSocket(wsUrl);
     socketRef.current = ws;
     ws.addEventListener('open', () => setConnected(true));
