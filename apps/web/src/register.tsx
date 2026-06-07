@@ -320,13 +320,13 @@ function AddProgram({ token, diver, categories, onSaved }: {
                   <div key={i} className="row" style={{ gap: 8, alignItems: 'center' }}>
                     <span className="muted" style={{ width: 16, textAlign: 'right', fontSize: '0.85rem' }}>{i + 1}</span>
                     <input
-                      style={{ flex: '1 1 0', minWidth: 0 }}
+                      style={{ flex: '1 1 auto', width: 'auto', minWidth: 0 }}
                       inputMode="numeric"
                       placeholder="code (e.g. 5253)"
                       value={row.code}
                       onChange={(e) => setRow(i, { code: e.target.value })}
                     />
-                    <select value={row.position} onChange={(e) => setRow(i, { position: e.target.value as DivePosition })}>
+                    <select style={{ flex: '0 0 auto', width: 'auto' }} value={row.position} onChange={(e) => setRow(i, { position: e.target.value as DivePosition })}>
                       {POSITIONS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
                     </select>
                     <span className="muted" style={{ width: 52, textAlign: 'right', fontSize: '0.85rem' }}>
