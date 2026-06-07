@@ -118,7 +118,14 @@ export function RegistrationPage({ token }: { token: string }) {
           {data.registration.clubName ? `${data.registration.clubName} · ` : ''}{data.registration.contactName}
           {data.competition?.date ? ` · ${formatDateRange(data.competition.date, data.competition.endDate)}` : ''}
         </p>
-        {locked ? <p>Your registration has been submitted. Changes are no longer possible.</p> : null}
+        {locked ? (
+          <>
+            <p style={{ marginBottom: 12 }}>Your registration has been submitted. Reopen it if you still need to add or change programs.</p>
+            <Button icon="settings" variant="ghost" onClick={async () => { await publicApi.post(`/registration/${token}/reopen`); reload(); }}>
+              Reopen to make changes
+            </Button>
+          </>
+        ) : null}
       </Card>
 
       {data.divers.length === 0 ? (
@@ -133,8 +140,22 @@ export function RegistrationPage({ token }: { token: string }) {
 
       {!locked && data.divers.length > 0 ? (
         <Card title="Submit">
-          <p className="muted" style={{ marginTop: 0 }}>Done? Submit your registration. After that you can't make changes.</p>
-          <Button icon="check" onClick={async () => { await publicApi.post(`/registration/${token}/submit`); reload(); }}>
+          {data.entries.length === 0 ? (
+            <p className="muted" style={{ marginTop: 0 }}>
+              No programs added yet — add a program/event for each diver above before submitting.
+            </p>
+          ) : (
+            <p className="muted" style={{ marginTop: 0 }}>Done? Submit your registration. You can reopen it later if you need to make changes.</p>
+          )}
+          <Button
+            icon="check"
+            disabled={data.entries.length === 0}
+            onClick={async () => {
+              if (!confirm('Submit your registration now? You can reopen it later to make changes.')) return;
+              await publicApi.post(`/registration/${token}/submit`);
+              reload();
+            }}
+          >
             Submit registration
           </Button>
         </Card>

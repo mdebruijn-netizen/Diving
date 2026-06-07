@@ -144,3 +144,10 @@ publicRoutes.post('/registration/:token/submit', async (c) => {
   await db(c).registrations.put(reg.id, { ...reg, status: 'submitted' });
   return c.json({ ok: true });
 });
+
+publicRoutes.post('/registration/:token/reopen', async (c) => {
+  const reg = await db(c).registrations.byToken(c.req.param('token'));
+  if (!reg) return c.notFound();
+  await db(c).registrations.put(reg.id, { ...reg, status: 'open' });
+  return c.json({ ok: true });
+});
