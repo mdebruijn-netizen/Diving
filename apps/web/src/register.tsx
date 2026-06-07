@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Card, EmptyState, Field, Logo } from '@aquameet/ui';
 import type { Category, Competition, DiveSheet, Diver, Entry, Gender } from '@aquameet/competition';
-import { formatDateRange } from '@aquameet/competition';
+import { ageBandLabel, formatDateRange, isDiverEligible, isOwnGroup } from '@aquameet/competition';
 import { publicApi, newId } from './public-api';
 import { parseSheetInput, validateSheet, type Discipline } from './sheet';
 
@@ -223,7 +223,9 @@ function AddProgram({ token, diver, categories, onSaved }: {
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const category = categories.find((c) => c.id === categoryId);
+  // A diver may enter their own group or an older/harder one — never a younger/easier group.
+  const eligible = useMemo(() => categories.filter((c) => isDiverEligible(diver.birthYear, c)), [categories, diver.birthYear]);
+  const category = eligible.find((c) => c.id === categoryId);
   const dives = useMemo(() => parseSheetInput(text), [text]);
   const result = useMemo(
     () => (category ? validateSheet(category.disciplineId as Discipline, dives, category.rules) : null),
@@ -247,11 +249,19 @@ function AddProgram({ token, diver, categories, onSaved }: {
 
   return (
     <div className="col" style={{ marginTop: 6, paddingTop: 12, borderTop: '1px solid var(--line-soft)' }}>
-      <Field label="Add a program — choose category">
-        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-          <option value="">— choose category —</option>
-          {categories.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.rules.diveCount} dives)</option>)}
-        </select>
+      <Field label="Add a program — choose group/event" hint={`Groups for ${diver.firstName} (born ${diver.birthYear}) — own group or older`}>
+        {eligible.length === 0 ? (
+          <p className="muted">No groups available for this birth year yet.</p>
+        ) : (
+          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            <option value="">— choose group/event —</option>
+            {eligible.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name} ({c.rules.diveCount} dives){isOwnGroup(diver.birthYear, c) ? ' — own group' : ageBandLabel(c) ? ` — ${ageBandLabel(c)}` : ''}
+              </option>
+            ))}
+          </select>
+        )}
       </Field>
       {category ? (
         <>

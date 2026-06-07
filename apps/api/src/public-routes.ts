@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { Diver, Entry, Registration } from '@aquameet/competition';
+import { isDiverEligible } from '@aquameet/competition';
 import { D1AppDatabase } from './d1-database';
 import type { Env } from './env';
 
@@ -104,6 +105,10 @@ publicRoutes.put('/registration/:token/entries/:entryId', async (c) => {
   const body = await c.req.json<{ diverId: string; categoryId: string }>();
   const diver = await d.divers.get(body.diverId);
   if (!diver || diver.registrationId !== r.reg.id) return c.json({ error: 'bad_diver' }, 400);
+  const category = await d.categories.get(body.categoryId);
+  if (!category) return c.json({ error: 'bad_category' }, 400);
+  // Enforce the age-group floor: a diver may enter their own or an older group, never a younger one.
+  if (!isDiverEligible(diver.birthYear, category)) return c.json({ error: 'age_not_eligible' }, 400);
   const entry: Entry = { id: c.req.param('entryId'), diverId: body.diverId, categoryId: body.categoryId, registrationId: r.reg.id };
   await d.entries.put(entry.id, entry);
   return c.json(entry);

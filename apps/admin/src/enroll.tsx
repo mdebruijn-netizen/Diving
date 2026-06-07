@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Card, EmptyState, Field, Icon, Stat } from '@aquameet/ui';
 import type { Category, Competition, DiveSheet, Diver, Entry } from '@aquameet/competition';
+import { ageBandLabel, isDiverEligible } from '@aquameet/competition';
 import { api, newId, useCollection } from './api';
 import { parseSheetInput, validateSheet, type Discipline } from './view-model';
 
@@ -68,7 +69,8 @@ function CategoryEnrollment({ category, divers }: { category: Category; divers: 
 
   const diverById = useMemo(() => new Map(divers.map((d) => [d.id, d])), [divers]);
   const enrolledIds = new Set(entries.map((e) => e.diverId));
-  const available = divers.filter((d) => !enrolledIds.has(d.id));
+  // Eligible = not yet entered AND not too old for this group (own group or older only).
+  const available = divers.filter((d) => !enrolledIds.has(d.id) && isDiverEligible(d.birthYear, category));
 
   return (
     <div className="grid cols-2" style={{ marginTop: 18 }}>
@@ -79,6 +81,7 @@ function CategoryEnrollment({ category, divers }: { category: Category; divers: 
           Rules: {category.rules.diveCount} dives
           {category.rules.requireDistinctGroups ? ` · min. ${category.rules.requireDistinctGroups} groups` : ''}
           {category.rules.maxTotalDd ? ` · max. DD ${category.rules.maxTotalDd}` : ''} · event {category.disciplineId}
+          {ageBandLabel(category) ? ` · ${ageBandLabel(category)}` : ''}
         </p>
         {loading ? <p className="muted">Loading…</p> : entries.length === 0 ? (
           <EmptyState icon="users" title="Nobody entered yet" description="Add the first diver with a program on the left." />
@@ -135,7 +138,7 @@ function EnrollForm({
             {available.map((d) => <option key={d.id} value={d.id}>{diverLabel(d)} ({d.birthYear})</option>)}
           </select>
         </Field>
-        {available.length === 0 ? <p className="muted">All known divers are already entered (or add more under Participants).</p> : null}
+        {available.length === 0 ? <p className="muted">No eligible divers left — everyone's entered, too old for this group, or add more under Participants.</p> : null}
 
         <Field label="Program (dive sheet)" hint="One per line: code position — e.g. 5253 B">
           <textarea value={text} onChange={(e) => setText(e.target.value)} rows={8} placeholder={EXAMPLE} />

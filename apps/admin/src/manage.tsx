@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Badge, Button, Card, EmptyState, Field } from '@aquameet/ui';
 import type { Category, Competition, DiveSheet, Diver, Entry, Gender, Registration } from '@aquameet/competition';
-import { formatDateRange } from '@aquameet/competition';
+import { ageBandLabel, formatDateRange } from '@aquameet/competition';
 import { api, newId, useCollection } from './api';
 import { DISCIPLINES, validateSheet, type Discipline } from './view-model';
 
@@ -167,6 +167,8 @@ export function Categories() {
   const [disciplineId, setDisciplineId] = useState<Discipline>('springboard-3m');
   const [diveCount, setDiveCount] = useState(6);
   const [competitionId, setCompetitionId] = useState('');
+  const [minBirthYear, setMinBirthYear] = useState<number | ''>('');
+  const [maxBirthYear, setMaxBirthYear] = useState<number | ''>('');
 
   const add = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,8 +178,10 @@ export function Categories() {
       id, name: name.trim(), gender, ageGroup, disciplineId,
       rules: { diveCount },
       competitionId: competitionId || undefined,
+      minBirthYear: minBirthYear === '' ? undefined : minBirthYear,
+      maxBirthYear: maxBirthYear === '' ? undefined : maxBirthYear,
     });
-    setName('');
+    setName(''); setMinBirthYear(''); setMaxBirthYear('');
     refresh();
   };
   const remove = async (id: string) => { await api.del(`/categories/${id}`); refresh(); };
@@ -204,6 +208,10 @@ export function Categories() {
               </Field>
               <Field label="Number of dives"><input type="number" value={diveCount} onChange={(e) => setDiveCount(Number(e.target.value))} /></Field>
             </div>
+            <div className="grid cols-2">
+              <Field label="Born from (year)" hint="Oldest birth year in this group"><input type="number" placeholder="e.g. 2016" value={minBirthYear} onChange={(e) => setMinBirthYear(e.target.value === '' ? '' : Number(e.target.value))} /></Field>
+              <Field label="Born until (year)" hint="Youngest birth year (optional)"><input type="number" placeholder="e.g. 2017" value={maxBirthYear} onChange={(e) => setMaxBirthYear(e.target.value === '' ? '' : Number(e.target.value))} /></Field>
+            </div>
             <Field label="Competition">
               <select value={competitionId} onChange={(e) => setCompetitionId(e.target.value)}>
                 <option value="">— none —</option>
@@ -224,7 +232,7 @@ export function Categories() {
               <tbody>
                 {items.map((cat) => (
                   <tr key={cat.id}>
-                    <td><b>{cat.name}</b><br /><span className="muted">{cat.gender} · {cat.ageGroup} · {cat.rules.diveCount} dives</span></td>
+                    <td><b>{cat.name}</b><br /><span className="muted">{cat.gender} · {cat.ageGroup} · {cat.rules.diveCount} dives{ageBandLabel(cat) ? ` · ${ageBandLabel(cat)}` : ''}</span></td>
                     <td className="dim">{cat.disciplineId}</td>
                     <td className="dim">{compName(cat.competitionId)}</td>
                     <td style={{ textAlign: 'right' }}><Button variant="danger" onClick={() => remove(cat.id)}>Delete</Button></td>

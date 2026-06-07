@@ -81,6 +81,14 @@ export interface Category {
   rules: CategoryRules;
   /** Competition this category belongs to. */
   competitionId?: string;
+  /**
+   * Birth-year band for this group. `minBirthYear` is the earliest year (the
+   * oldest children); `maxBirthYear` the latest (the youngest). A diver may
+   * enter their own band or an older/harder one, never a younger/easier one —
+   * so eligibility is `diver.birthYear >= minBirthYear`. Omit for no age limit.
+   */
+  minBirthYear?: number;
+  maxBirthYear?: number;
 }
 
 export interface DiveListItem {
