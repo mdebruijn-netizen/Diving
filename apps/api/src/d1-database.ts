@@ -1,6 +1,14 @@
-import type { Category, Club, Competition, DiveSheet, Diver, Entry } from '@aquameet/competition';
+import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration } from '@aquameet/competition';
 import type { Subscription } from '@aquameet/control-plane';
-import type { CategoryStore, Collection, Database, EntryStore, SheetStore } from '@aquameet/persistence';
+import type {
+  CategoryStore,
+  Collection,
+  Database,
+  DiverStore,
+  EntryStore,
+  RegistrationStore,
+  SheetStore,
+} from '@aquameet/persistence';
 
 /**
  * D1-backed implementation of the `@aquameet/persistence` Database contract.
@@ -63,6 +71,50 @@ class D1EntryStore extends D1Collection<Entry> implements EntryStore {
       .all<{ data: string }>();
     return res.results.map((r) => JSON.parse(r.data) as Entry);
   }
+
+  async byRegistration(registrationId: string): Promise<Entry[]> {
+    const res = await this.db
+      .prepare("SELECT data FROM entries WHERE json_extract(data, '$.registrationId') = ?")
+      .bind(registrationId)
+      .all<{ data: string }>();
+    return res.results.map((r) => JSON.parse(r.data) as Entry);
+  }
+}
+
+class D1DiverStore extends D1Collection<Diver> implements DiverStore {
+  constructor(db: D1Database) {
+    super(db, 'divers');
+  }
+
+  async byRegistration(registrationId: string): Promise<Diver[]> {
+    const res = await this.db
+      .prepare("SELECT data FROM divers WHERE json_extract(data, '$.registrationId') = ?")
+      .bind(registrationId)
+      .all<{ data: string }>();
+    return res.results.map((r) => JSON.parse(r.data) as Diver);
+  }
+}
+
+class D1RegistrationStore extends D1Collection<Registration> implements RegistrationStore {
+  constructor(db: D1Database) {
+    super(db, 'registrations');
+  }
+
+  async byToken(token: string): Promise<Registration | undefined> {
+    const row = await this.db
+      .prepare("SELECT data FROM registrations WHERE json_extract(data, '$.token') = ?")
+      .bind(token)
+      .first<{ data: string }>();
+    return row ? (JSON.parse(row.data) as Registration) : undefined;
+  }
+
+  async byCompetition(competitionId: string): Promise<Registration[]> {
+    const res = await this.db
+      .prepare("SELECT data FROM registrations WHERE json_extract(data, '$.competitionId') = ?")
+      .bind(competitionId)
+      .all<{ data: string }>();
+    return res.results.map((r) => JSON.parse(r.data) as Registration);
+  }
 }
 
 class D1CategoryStore extends D1Collection<Category> implements CategoryStore {
@@ -103,8 +155,9 @@ class D1SheetStore implements SheetStore {
 
 export class D1AppDatabase implements Database {
   readonly competitions: Collection<Competition>;
+  readonly registrations: RegistrationStore;
   readonly clubs: Collection<Club>;
-  readonly divers: Collection<Diver>;
+  readonly divers: DiverStore;
   readonly categories: CategoryStore;
   readonly entries: EntryStore;
   readonly sheets: SheetStore;
@@ -112,8 +165,9 @@ export class D1AppDatabase implements Database {
 
   constructor(db: D1Database) {
     this.competitions = new D1Collection<Competition>(db, 'competitions');
+    this.registrations = new D1RegistrationStore(db);
     this.clubs = new D1Collection<Club>(db, 'clubs');
-    this.divers = new D1Collection<Diver>(db, 'divers');
+    this.divers = new D1DiverStore(db);
     this.categories = new D1CategoryStore(db);
     this.entries = new D1EntryStore(db);
     this.sheets = new D1SheetStore(db);

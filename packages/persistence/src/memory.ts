@@ -1,6 +1,14 @@
-import type { Category, Club, Competition, DiveSheet, Diver, Entry } from '@aquameet/competition';
+import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration } from '@aquameet/competition';
 import type { Subscription } from '@aquameet/control-plane';
-import type { CategoryStore, Collection, Database, EntryStore, SheetStore } from './types';
+import type {
+  CategoryStore,
+  Collection,
+  Database,
+  DiverStore,
+  EntryStore,
+  RegistrationStore,
+  SheetStore,
+} from './types';
 
 class MemoryCollection<T> implements Collection<T> {
   private readonly map = new Map<string, T>();
@@ -19,15 +27,33 @@ class MemoryCollection<T> implements Collection<T> {
   }
 }
 
+class MemoryDiverStore extends MemoryCollection<Diver> implements DiverStore {
+  async byRegistration(registrationId: string): Promise<Diver[]> {
+    return (await this.all()).filter((d) => d.registrationId === registrationId);
+  }
+}
+
 class MemoryEntryStore extends MemoryCollection<Entry> implements EntryStore {
   async byCategory(categoryId: string): Promise<Entry[]> {
     return (await this.all()).filter((e) => e.categoryId === categoryId);
+  }
+  async byRegistration(registrationId: string): Promise<Entry[]> {
+    return (await this.all()).filter((e) => e.registrationId === registrationId);
   }
 }
 
 class MemoryCategoryStore extends MemoryCollection<Category> implements CategoryStore {
   async byCompetition(competitionId: string): Promise<Category[]> {
     return (await this.all()).filter((c) => c.competitionId === competitionId);
+  }
+}
+
+class MemoryRegistrationStore extends MemoryCollection<Registration> implements RegistrationStore {
+  async byToken(token: string): Promise<Registration | undefined> {
+    return (await this.all()).find((r) => r.token === token);
+  }
+  async byCompetition(competitionId: string): Promise<Registration[]> {
+    return (await this.all()).filter((r) => r.competitionId === competitionId);
   }
 }
 
@@ -45,8 +71,9 @@ class MemorySheetStore implements SheetStore {
 /** In-memory Database — for tests, local dev and the venue hub's working set. */
 export class InMemoryDatabase implements Database {
   readonly competitions = new MemoryCollection<Competition>();
+  readonly registrations = new MemoryRegistrationStore();
   readonly clubs = new MemoryCollection<Club>();
-  readonly divers = new MemoryCollection<Diver>();
+  readonly divers = new MemoryDiverStore();
   readonly categories = new MemoryCategoryStore();
   readonly entries = new MemoryEntryStore();
   readonly sheets = new MemorySheetStore();

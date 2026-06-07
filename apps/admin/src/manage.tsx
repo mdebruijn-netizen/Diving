@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Badge, Button, Card, EmptyState, Field } from '@aquameet/ui';
-import type { Category, Competition, Diver, Gender } from '@aquameet/competition';
+import type { Category, Competition, DiveSheet, Diver, Entry, Gender, Registration } from '@aquameet/competition';
 import { api, newId, useCollection } from './api';
-import { DISCIPLINES, type Discipline } from './view-model';
+import { DISCIPLINES, validateSheet, type Discipline } from './view-model';
 
 function ErrorNote({ error }: { error: string | null }) {
   if (!error) return null;
@@ -26,10 +26,15 @@ export function Competitions() {
   };
 
   const remove = async (id: string) => { await api.del(`/competitions/${id}`); refresh(); };
+  const toggleReg = async (w: Competition) => {
+    await api.put(`/competitions/${w.id}`, { ...w, registrationOpen: !w.registrationOpen });
+    refresh();
+  };
+  const joinLink = `${window.location.origin}/web/#/join`;
 
   return (
     <>
-      <div className="page-head"><h1>Wedstrijden</h1><p>Maak en beheer je wedstrijden.</p></div>
+      <div className="page-head"><h1>Wedstrijden</h1><p>Maak en beheer je wedstrijden. Zet inschrijving open zodat clubs zich via de publieke link kunnen aanmelden.</p></div>
       <div className="grid cols-2">
         <Card title="Nieuwe wedstrijd">
           <form className="col" onSubmit={add}>
@@ -48,19 +53,27 @@ export function Competitions() {
             <EmptyState icon="trophy" title="Nog geen wedstrijden" description="Voeg links je eerste wedstrijd toe." />
           ) : (
             <table className="table">
-              <thead><tr><th>Naam</th><th>Datum</th><th>Locatie</th><th></th></tr></thead>
+              <thead><tr><th>Naam</th><th>Datum</th><th>Inschrijving</th><th></th></tr></thead>
               <tbody>
                 {items.map((w) => (
                   <tr key={w.id}>
-                    <td><b>{w.name}</b></td>
+                    <td><b>{w.name}</b><br /><span className="muted">{w.location ?? '—'}</span></td>
                     <td className="mono">{w.date}</td>
-                    <td className="dim">{w.location ?? '—'}</td>
-                    <td style={{ textAlign: 'right' }}><Button variant="danger" onClick={() => remove(w.id)}>Verwijderen</Button></td>
+                    <td>{w.registrationOpen ? <Badge tone="good">open</Badge> : <Badge tone="neutral">dicht</Badge>}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <Button onClick={() => toggleReg(w)}>{w.registrationOpen ? 'Sluiten' : 'Openen'}</Button>{' '}
+                      <Button variant="danger" onClick={() => remove(w.id)}>Verwijderen</Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
+          {items.some((w) => w.registrationOpen) ? (
+            <p className="muted" style={{ marginTop: 12 }}>
+              Publieke inschrijflink voor clubs: <code className="mono">{joinLink}</code>
+            </p>
+          ) : null}
         </Card>
       </div>
     </>
@@ -213,5 +226,111 @@ export function Categories() {
         </Card>
       </div>
     </>
+  );
+}
+
+/* ---------------- Aanmeldingen (self-service sign-ups) ---------------- */
+interface RegDetail {
+  registration: Registration;
+  divers: Diver[];
+  entries: Entry[];
+  sheets: Record<string, DiveSheet>;
+}
+
+export function Registrations() {
+  const competitions = useCollection<Competition>('/competitions');
+  const categories = useCollection<Category>('/categories');
+  const [competitionId, setCompetitionId] = useState('');
+  const [regs, setRegs] = useState<Registration[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!competitionId) { setRegs([]); return; }
+    setLoading(true);
+    api.list<Registration>(`/competitions/${competitionId}/registrations`).then(setRegs).finally(() => setLoading(false));
+  }, [competitionId]);
+
+  const catById = new Map(categories.items.map((c) => [c.id, c]));
+
+  return (
+    <>
+      <div className="page-head"><h1>Aanmeldingen</h1><p>Zelf-aangemelde clubs en hun ingediende programma's, per wedstrijd.</p></div>
+      <Card title="Wedstrijd">
+        <Field label="Kies wedstrijd">
+          <select value={competitionId} onChange={(e) => setCompetitionId(e.target.value)}>
+            <option value="">— kies wedstrijd —</option>
+            {competitions.items.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </select>
+        </Field>
+      </Card>
+
+      {competitionId ? (
+        <Card title="Aanmeldingen" actions={<Badge tone="info">{regs.length}</Badge>}>
+          {loading ? <p className="muted">Laden…</p> : regs.length === 0 ? (
+            <EmptyState icon="users" title="Nog geen aanmeldingen" description="Zodra een club zich via de publieke link aanmeldt, verschijnt die hier." />
+          ) : (
+            <div className="col">
+              {regs.map((r) => <RegRow key={r.id} reg={r} catById={catById} />)}
+            </div>
+          )}
+        </Card>
+      ) : null}
+    </>
+  );
+}
+
+function RegRow({ reg, catById }: { reg: Registration; catById: Map<string, Category> }) {
+  const [open, setOpen] = useState(false);
+  const [detail, setDetail] = useState<RegDetail | null>(null);
+
+  useEffect(() => {
+    if (open && !detail) api.get<RegDetail>(`/registrations/${reg.id}`).then(setDetail);
+  }, [open, detail, reg.id]);
+
+  const diverName = (id: string) => {
+    const d = detail?.divers.find((x) => x.id === id);
+    return d ? `${d.firstName} ${d.lastName}` : id;
+  };
+  const status = (e: Entry) => {
+    const cat = catById.get(e.categoryId);
+    const sheet = detail?.sheets[e.id];
+    if (!sheet || sheet.dives.length === 0) return <Badge tone="warn">geen lijst</Badge>;
+    if (!cat) return <Badge tone="neutral">?</Badge>;
+    return validateSheet(cat.disciplineId as Discipline, sheet.dives, cat.rules).valid
+      ? <Badge tone="good">geldig</Badge> : <Badge tone="bad">ongeldig</Badge>;
+  };
+
+  return (
+    <div style={{ borderRadius: 12, border: '1px solid var(--line-soft)' }}>
+      <button className="row between" onClick={() => setOpen(!open)} style={{ all: 'unset', cursor: 'pointer', width: '100%', boxSizing: 'border-box', padding: '12px 14px' }}>
+        <span className="col" style={{ gap: 2 }}>
+          <b>{reg.clubName || reg.contactName}</b>
+          <span className="muted" style={{ fontSize: '0.84rem' }}>{reg.contactName} · {reg.contactEmail}</span>
+        </span>
+        <span className="row" style={{ gap: 10 }}>
+          {reg.status === 'submitted' ? <Badge tone="good">ingediend</Badge> : <Badge tone="warn">concept</Badge>}
+        </span>
+      </button>
+      {open ? (
+        <div style={{ padding: '0 14px 14px' }}>
+          {!detail ? <p className="muted">Laden…</p> : detail.entries.length === 0 ? (
+            <p className="muted">Nog geen inschrijvingen ingevuld.</p>
+          ) : (
+            <table className="table">
+              <thead><tr><th>Diver</th><th>Categorie</th><th>Status</th></tr></thead>
+              <tbody>
+                {detail.entries.map((e) => (
+                  <tr key={e.id}>
+                    <td>{diverName(e.diverId)}</td>
+                    <td className="dim">{catById.get(e.categoryId)?.name ?? e.categoryId}</td>
+                    <td>{status(e)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      ) : null}
+    </div>
   );
 }

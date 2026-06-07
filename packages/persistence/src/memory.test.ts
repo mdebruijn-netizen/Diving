@@ -28,6 +28,23 @@ describe('InMemoryDatabase', () => {
     expect(inW1.map((c) => c.id)).toEqual(['c1']);
   });
 
+  it('stores registrations and scopes divers/entries by registration', async () => {
+    const db = new InMemoryDatabase();
+    await db.registrations.put('r1', {
+      id: 'r1', competitionId: 'w1', contactName: 'Coach', contactEmail: 'c@x.nl',
+      token: 'tok-abc', status: 'open', createdAt: '2026-01-01',
+    });
+    expect((await db.registrations.byToken('tok-abc'))?.id).toBe('r1');
+    expect((await db.registrations.byCompetition('w1')).map((r) => r.id)).toEqual(['r1']);
+
+    await db.divers.put('d1', { id: 'd1', firstName: 'A', lastName: 'B', gender: 'F', birthYear: 2012, clubId: '', registrationId: 'r1' });
+    await db.divers.put('d2', { id: 'd2', firstName: 'C', lastName: 'D', gender: 'M', birthYear: 2011, clubId: '' });
+    expect((await db.divers.byRegistration('r1')).map((d) => d.id)).toEqual(['d1']);
+
+    await db.entries.put('e1', { id: 'e1', diverId: 'd1', categoryId: 'c1', registrationId: 'r1' });
+    expect((await db.entries.byRegistration('r1')).map((e) => e.id)).toEqual(['e1']);
+  });
+
   it('queries entries by category', async () => {
     const db = new InMemoryDatabase();
     await db.entries.put('e1', entry('e1', 'cat-A'));

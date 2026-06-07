@@ -15,6 +15,28 @@ export interface Competition {
   /** ISO date (YYYY-MM-DD). */
   date: string;
   location?: string;
+  /** Whether clubs/divers can self-register for this competition. */
+  registrationOpen?: boolean;
+  /** Optional ISO date after which self-registration locks. */
+  registrationDeadline?: string;
+}
+
+/**
+ * A self-service registration: one contact (a club, coach or parent) signs up
+ * for a competition and manages one or more divers + their dive sheets via a
+ * magic-link token — no account required (accounts can be layered on later).
+ */
+export interface Registration {
+  id: string;
+  competitionId: string;
+  contactName: string;
+  contactEmail: string;
+  clubName?: string;
+  /** Opaque secret embedded in the magic link; grants access to this registration only. */
+  token: string;
+  /** 'open' while editable; 'submitted' once locked in by the contact. */
+  status: 'open' | 'submitted';
+  createdAt: string;
 }
 
 export interface Club {
@@ -30,6 +52,8 @@ export interface Diver {
   gender: Gender;
   birthYear: number;
   clubId: string;
+  /** Set when the diver was added via a self-service registration. */
+  registrationId?: string;
 }
 
 /** Rules a dive sheet must satisfy for a category (federation/age-group data). */
@@ -71,4 +95,6 @@ export interface Entry {
   id: string;
   diverId: string;
   categoryId: string;
+  /** Set when the entry was created via a self-service registration. */
+  registrationId?: string;
 }

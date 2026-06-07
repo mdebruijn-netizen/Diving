@@ -29,6 +29,21 @@ adminRoutes.delete('/competitions/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+/* ---------- Registrations (self-service sign-ups, read-only for review) ---------- */
+adminRoutes.get('/competitions/:id/registrations', async (c) =>
+  c.json(await db(c).registrations.byCompetition(c.req.param('id'))),
+);
+adminRoutes.get('/registrations/:id', async (c) => {
+  const d = db(c);
+  const reg = await d.registrations.get(c.req.param('id'));
+  if (!reg) return c.notFound();
+  const [divers, entries] = await Promise.all([d.divers.byRegistration(reg.id), d.entries.byRegistration(reg.id)]);
+  const sheets = Object.fromEntries(
+    (await Promise.all(entries.map(async (e) => [e.id, await d.sheets.get(e.id)] as const))).filter(([, s]) => s),
+  );
+  return c.json({ registration: reg, divers, entries, sheets });
+});
+
 /* ---------- Categories ---------- */
 adminRoutes.get('/categories', async (c) => {
   const competitionId = c.req.query('competitionId');

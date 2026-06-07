@@ -1,4 +1,4 @@
-import type { Category, Club, Competition, DiveSheet, Diver, Entry } from '@aquameet/competition';
+import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration } from '@aquameet/competition';
 import type { Subscription } from '@aquameet/control-plane';
 
 /**
@@ -13,14 +13,28 @@ export interface Collection<T> {
   remove(id: string): Promise<void>;
 }
 
+export interface DiverStore extends Collection<Diver> {
+  /** Divers added under a self-service registration. */
+  byRegistration(registrationId: string): Promise<Diver[]>;
+}
+
 export interface EntryStore extends Collection<Entry> {
   /** Entries belonging to a category (the running order's result class). */
   byCategory(categoryId: string): Promise<Entry[]>;
+  /** Entries created under a self-service registration. */
+  byRegistration(registrationId: string): Promise<Entry[]>;
 }
 
 export interface CategoryStore extends Collection<Category> {
   /** Categories belonging to a competition. */
   byCompetition(competitionId: string): Promise<Category[]>;
+}
+
+export interface RegistrationStore extends Collection<Registration> {
+  /** Look up a registration by its magic-link token. */
+  byToken(token: string): Promise<Registration | undefined>;
+  /** Registrations for a competition. */
+  byCompetition(competitionId: string): Promise<Registration[]>;
 }
 
 export interface SheetStore {
@@ -30,8 +44,9 @@ export interface SheetStore {
 
 export interface Database {
   competitions: Collection<Competition>;
+  registrations: RegistrationStore;
   clubs: Collection<Club>;
-  divers: Collection<Diver>;
+  divers: DiverStore;
   categories: CategoryStore;
   entries: EntryStore;
   sheets: SheetStore;

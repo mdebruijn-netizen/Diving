@@ -125,6 +125,9 @@ importers:
       '@aquameet/competition':
         specifier: workspace:*
         version: link:../../packages/competition
+      '@aquameet/rule-packs':
+        specifier: workspace:*
+        version: link:../../packages/rule-packs
       '@aquameet/sync':
         specifier: workspace:*
         version: link:../../packages/sync
