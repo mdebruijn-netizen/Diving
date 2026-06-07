@@ -6,10 +6,10 @@ import { DISCIPLINES, validateSheet, type Discipline } from './view-model';
 
 function ErrorNote({ error }: { error: string | null }) {
   if (!error) return null;
-  return <p className="muted" style={{ color: 'var(--bad)' }}>Kon niet laden: {error}. Is de API gedeployed en de database-migratie gedraaid?</p>;
+  return <p className="muted" style={{ color: 'var(--bad)' }}>Could not load: {error}. Is the API deployed and the database migration applied?</p>;
 }
 
-/* ---------------- Wedstrijden ---------------- */
+/* ---------------- Competitions ---------------- */
 export function Competitions() {
   const { items, refresh, loading, error } = useCollection<Competition>('/competitions');
   const [name, setName] = useState('');
@@ -34,35 +34,35 @@ export function Competitions() {
 
   return (
     <>
-      <div className="page-head"><h1>Wedstrijden</h1><p>Maak en beheer je wedstrijden. Zet inschrijving open zodat clubs zich via de publieke link kunnen aanmelden.</p></div>
+      <div className="page-head"><h1>Competitions</h1><p>Create and manage your competitions. Open registration so clubs can sign up via the public link.</p></div>
       <div className="grid cols-2">
-        <Card title="Nieuwe wedstrijd">
+        <Card title="New competition">
           <form className="col" onSubmit={add}>
-            <Field label="Naam"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Voorjaarswedstrijd 2026" /></Field>
+            <Field label="Name"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Spring Meet 2026" /></Field>
             <div className="grid cols-2">
-              <Field label="Datum"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
-              <Field label="Locatie"><input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Zwembad…" /></Field>
+              <Field label="Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
+              <Field label="Location"><input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Pool…" /></Field>
             </div>
-            <Button type="submit" icon="plus">Wedstrijd toevoegen</Button>
+            <Button type="submit" icon="plus">Add competition</Button>
           </form>
         </Card>
 
-        <Card title="Wedstrijden" actions={<Badge tone="info">{items.length}</Badge>}>
+        <Card title="Competitions" actions={<Badge tone="info">{items.length}</Badge>}>
           <ErrorNote error={error} />
-          {loading ? <p className="muted">Laden…</p> : items.length === 0 ? (
-            <EmptyState icon="trophy" title="Nog geen wedstrijden" description="Voeg links je eerste wedstrijd toe." />
+          {loading ? <p className="muted">Loading…</p> : items.length === 0 ? (
+            <EmptyState icon="trophy" title="No competitions yet" description="Add your first competition on the left." />
           ) : (
             <table className="table">
-              <thead><tr><th>Naam</th><th>Datum</th><th>Inschrijving</th><th></th></tr></thead>
+              <thead><tr><th>Name</th><th>Date</th><th>Registration</th><th></th></tr></thead>
               <tbody>
                 {items.map((w) => (
                   <tr key={w.id}>
                     <td><b>{w.name}</b><br /><span className="muted">{w.location ?? '—'}</span></td>
                     <td className="mono">{w.date}</td>
-                    <td>{w.registrationOpen ? <Badge tone="good">open</Badge> : <Badge tone="neutral">dicht</Badge>}</td>
+                    <td>{w.registrationOpen ? <Badge tone="good">open</Badge> : <Badge tone="neutral">closed</Badge>}</td>
                     <td style={{ textAlign: 'right' }}>
-                      <Button onClick={() => toggleReg(w)}>{w.registrationOpen ? 'Sluiten' : 'Openen'}</Button>{' '}
-                      <Button variant="danger" onClick={() => remove(w.id)}>Verwijderen</Button>
+                      <Button onClick={() => toggleReg(w)}>{w.registrationOpen ? 'Close' : 'Open'}</Button>{' '}
+                      <Button variant="danger" onClick={() => remove(w.id)}>Delete</Button>
                     </td>
                   </tr>
                 ))}
@@ -71,7 +71,7 @@ export function Competitions() {
           )}
           {items.some((w) => w.registrationOpen) ? (
             <p className="muted" style={{ marginTop: 12 }}>
-              Publieke inschrijflink voor clubs: <code className="mono">{joinLink}</code>
+              Public sign-up link for clubs: <code className="mono">{joinLink}</code>
             </p>
           ) : null}
         </Card>
@@ -80,7 +80,7 @@ export function Competitions() {
   );
 }
 
-/* ---------------- Deelnemers ---------------- */
+/* ---------------- Participants ---------------- */
 export function Participants() {
   const { items, refresh, loading, error } = useCollection<Diver>('/divers');
   const [firstName, setFirstName] = useState('');
@@ -101,41 +101,41 @@ export function Participants() {
 
   return (
     <>
-      <div className="page-head"><h1>Deelnemers</h1><p>Beheer de divers die meedoen.</p></div>
+      <div className="page-head"><h1>Participants</h1><p>Manage the divers taking part.</p></div>
       <div className="grid cols-2">
-        <Card title="Nieuwe deelnemer">
+        <Card title="New participant">
           <form className="col" onSubmit={add}>
             <div className="grid cols-2">
-              <Field label="Voornaam"><input value={firstName} onChange={(e) => setFirstName(e.target.value)} /></Field>
-              <Field label="Achternaam"><input value={lastName} onChange={(e) => setLastName(e.target.value)} /></Field>
-              <Field label="Geslacht">
+              <Field label="First name"><input value={firstName} onChange={(e) => setFirstName(e.target.value)} /></Field>
+              <Field label="Last name"><input value={lastName} onChange={(e) => setLastName(e.target.value)} /></Field>
+              <Field label="Gender">
                 <select value={gender} onChange={(e) => setGender(e.target.value as Gender)}>
-                  <option value="F">Meisje/Vrouw</option>
-                  <option value="M">Jongen/Man</option>
-                  <option value="X">Gemengd/Overig</option>
+                  <option value="F">Female</option>
+                  <option value="M">Male</option>
+                  <option value="X">Mixed/Other</option>
                 </select>
               </Field>
-              <Field label="Geboortejaar"><input type="number" value={birthYear} onChange={(e) => setBirthYear(Number(e.target.value))} /></Field>
+              <Field label="Birth year"><input type="number" value={birthYear} onChange={(e) => setBirthYear(Number(e.target.value))} /></Field>
             </div>
-            <Field label="Club"><input value={club} onChange={(e) => setClub(e.target.value)} placeholder="Clubnaam" /></Field>
-            <Button type="submit" icon="plus">Deelnemer toevoegen</Button>
+            <Field label="Club"><input value={club} onChange={(e) => setClub(e.target.value)} placeholder="Club name" /></Field>
+            <Button type="submit" icon="plus">Add participant</Button>
           </form>
         </Card>
 
-        <Card title="Deelnemers" actions={<Badge tone="info">{items.length}</Badge>}>
+        <Card title="Participants" actions={<Badge tone="info">{items.length}</Badge>}>
           <ErrorNote error={error} />
-          {loading ? <p className="muted">Laden…</p> : items.length === 0 ? (
-            <EmptyState icon="users" title="Nog geen deelnemers" description="Voeg links je eerste diver toe." />
+          {loading ? <p className="muted">Loading…</p> : items.length === 0 ? (
+            <EmptyState icon="users" title="No participants yet" description="Add your first diver on the left." />
           ) : (
             <table className="table">
-              <thead><tr><th>Naam</th><th>Jaar</th><th>Club</th><th></th></tr></thead>
+              <thead><tr><th>Name</th><th>Year</th><th>Club</th><th></th></tr></thead>
               <tbody>
                 {items.map((d) => (
                   <tr key={d.id}>
                     <td><b>{d.firstName} {d.lastName}</b> <span className="muted">{d.gender}</span></td>
                     <td className="mono">{d.birthYear}</td>
                     <td className="dim">{d.clubId || '—'}</td>
-                    <td style={{ textAlign: 'right' }}><Button variant="danger" onClick={() => remove(d.id)}>Verwijderen</Button></td>
+                    <td style={{ textAlign: 'right' }}><Button variant="danger" onClick={() => remove(d.id)}>Delete</Button></td>
                   </tr>
                 ))}
               </tbody>
@@ -147,7 +147,7 @@ export function Participants() {
   );
 }
 
-/* ---------------- Categorieën ---------------- */
+/* ---------------- Categories ---------------- */
 export function Categories() {
   const { items, refresh, loading, error } = useCollection<Category>('/categories');
   const competitions = useCollection<Competition>('/competitions');
@@ -175,49 +175,49 @@ export function Categories() {
 
   return (
     <>
-      <div className="page-head"><h1>Categorieën</h1><p>Geslacht × leeftijdsgroep × onderdeel, met sprongregels.</p></div>
+      <div className="page-head"><h1>Categories</h1><p>Gender × age group × event, with dive-sheet rules.</p></div>
       <div className="grid cols-2">
-        <Card title="Nieuwe categorie">
+        <Card title="New category">
           <form className="col" onSubmit={add}>
-            <Field label="Naam"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Meisjes 12-13 — 3m" /></Field>
+            <Field label="Name"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Girls 12-13 — 3m" /></Field>
             <div className="grid cols-2">
-              <Field label="Geslacht">
+              <Field label="Gender">
                 <select value={gender} onChange={(e) => setGender(e.target.value as Gender)}>
-                  <option value="F">Meisjes</option><option value="M">Jongens</option><option value="X">Gemengd</option>
+                  <option value="F">Girls</option><option value="M">Boys</option><option value="X">Mixed</option>
                 </select>
               </Field>
-              <Field label="Leeftijdsgroep"><input value={ageGroup} onChange={(e) => setAgeGroup(e.target.value)} /></Field>
-              <Field label="Onderdeel">
+              <Field label="Age group"><input value={ageGroup} onChange={(e) => setAgeGroup(e.target.value)} /></Field>
+              <Field label="Event">
                 <select value={disciplineId} onChange={(e) => setDisciplineId(e.target.value as Discipline)}>
                   {DISCIPLINES.map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
               </Field>
-              <Field label="Aantal sprongen"><input type="number" value={diveCount} onChange={(e) => setDiveCount(Number(e.target.value))} /></Field>
+              <Field label="Number of dives"><input type="number" value={diveCount} onChange={(e) => setDiveCount(Number(e.target.value))} /></Field>
             </div>
-            <Field label="Wedstrijd">
+            <Field label="Competition">
               <select value={competitionId} onChange={(e) => setCompetitionId(e.target.value)}>
-                <option value="">— geen —</option>
+                <option value="">— none —</option>
                 {competitions.items.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
               </select>
             </Field>
-            <Button type="submit" icon="plus">Categorie toevoegen</Button>
+            <Button type="submit" icon="plus">Add category</Button>
           </form>
         </Card>
 
-        <Card title="Categorieën" actions={<Badge tone="info">{items.length}</Badge>}>
+        <Card title="Categories" actions={<Badge tone="info">{items.length}</Badge>}>
           <ErrorNote error={error} />
-          {loading ? <p className="muted">Laden…</p> : items.length === 0 ? (
-            <EmptyState icon="layers" title="Nog geen categorieën" description="Voeg links je eerste categorie toe." />
+          {loading ? <p className="muted">Loading…</p> : items.length === 0 ? (
+            <EmptyState icon="layers" title="No categories yet" description="Add your first category on the left." />
           ) : (
             <table className="table">
-              <thead><tr><th>Naam</th><th>Onderdeel</th><th>Wedstrijd</th><th></th></tr></thead>
+              <thead><tr><th>Name</th><th>Event</th><th>Competition</th><th></th></tr></thead>
               <tbody>
                 {items.map((cat) => (
                   <tr key={cat.id}>
-                    <td><b>{cat.name}</b><br /><span className="muted">{cat.gender} · {cat.ageGroup} · {cat.rules.diveCount} sprongen</span></td>
+                    <td><b>{cat.name}</b><br /><span className="muted">{cat.gender} · {cat.ageGroup} · {cat.rules.diveCount} dives</span></td>
                     <td className="dim">{cat.disciplineId}</td>
                     <td className="dim">{compName(cat.competitionId)}</td>
-                    <td style={{ textAlign: 'right' }}><Button variant="danger" onClick={() => remove(cat.id)}>Verwijderen</Button></td>
+                    <td style={{ textAlign: 'right' }}><Button variant="danger" onClick={() => remove(cat.id)}>Delete</Button></td>
                   </tr>
                 ))}
               </tbody>
@@ -229,7 +229,7 @@ export function Categories() {
   );
 }
 
-/* ---------------- Aanmeldingen (self-service sign-ups) ---------------- */
+/* ---------------- Sign-ups (self-service registrations) ---------------- */
 interface RegDetail {
   registration: Registration;
   divers: Diver[];
@@ -254,20 +254,20 @@ export function Registrations() {
 
   return (
     <>
-      <div className="page-head"><h1>Aanmeldingen</h1><p>Zelf-aangemelde clubs en hun ingediende programma's, per wedstrijd.</p></div>
-      <Card title="Wedstrijd">
-        <Field label="Kies wedstrijd">
+      <div className="page-head"><h1>Sign-ups</h1><p>Self-registered clubs and the programs they submitted, per competition.</p></div>
+      <Card title="Competition">
+        <Field label="Choose competition">
           <select value={competitionId} onChange={(e) => setCompetitionId(e.target.value)}>
-            <option value="">— kies wedstrijd —</option>
+            <option value="">— choose competition —</option>
             {competitions.items.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
           </select>
         </Field>
       </Card>
 
       {competitionId ? (
-        <Card title="Aanmeldingen" actions={<Badge tone="info">{regs.length}</Badge>}>
-          {loading ? <p className="muted">Laden…</p> : regs.length === 0 ? (
-            <EmptyState icon="users" title="Nog geen aanmeldingen" description="Zodra een club zich via de publieke link aanmeldt, verschijnt die hier." />
+        <Card title="Sign-ups" actions={<Badge tone="info">{regs.length}</Badge>}>
+          {loading ? <p className="muted">Loading…</p> : regs.length === 0 ? (
+            <EmptyState icon="users" title="No sign-ups yet" description="As soon as a club signs up via the public link, it appears here." />
           ) : (
             <div className="col">
               {regs.map((r) => <RegRow key={r.id} reg={r} catById={catById} />)}
@@ -294,10 +294,10 @@ function RegRow({ reg, catById }: { reg: Registration; catById: Map<string, Cate
   const status = (e: Entry) => {
     const cat = catById.get(e.categoryId);
     const sheet = detail?.sheets[e.id];
-    if (!sheet || sheet.dives.length === 0) return <Badge tone="warn">geen lijst</Badge>;
+    if (!sheet || sheet.dives.length === 0) return <Badge tone="warn">no sheet</Badge>;
     if (!cat) return <Badge tone="neutral">?</Badge>;
     return validateSheet(cat.disciplineId as Discipline, sheet.dives, cat.rules).valid
-      ? <Badge tone="good">geldig</Badge> : <Badge tone="bad">ongeldig</Badge>;
+      ? <Badge tone="good">valid</Badge> : <Badge tone="bad">invalid</Badge>;
   };
 
   return (
@@ -308,16 +308,16 @@ function RegRow({ reg, catById }: { reg: Registration; catById: Map<string, Cate
           <span className="muted" style={{ fontSize: '0.84rem' }}>{reg.contactName} · {reg.contactEmail}</span>
         </span>
         <span className="row" style={{ gap: 10 }}>
-          {reg.status === 'submitted' ? <Badge tone="good">ingediend</Badge> : <Badge tone="warn">concept</Badge>}
+          {reg.status === 'submitted' ? <Badge tone="good">submitted</Badge> : <Badge tone="warn">draft</Badge>}
         </span>
       </button>
       {open ? (
         <div style={{ padding: '0 14px 14px' }}>
-          {!detail ? <p className="muted">Laden…</p> : detail.entries.length === 0 ? (
-            <p className="muted">Nog geen inschrijvingen ingevuld.</p>
+          {!detail ? <p className="muted">Loading…</p> : detail.entries.length === 0 ? (
+            <p className="muted">No entries filled in yet.</p>
           ) : (
             <table className="table">
-              <thead><tr><th>Diver</th><th>Categorie</th><th>Status</th></tr></thead>
+              <thead><tr><th>Diver</th><th>Category</th><th>Status</th></tr></thead>
               <tbody>
                 {detail.entries.map((e) => (
                   <tr key={e.id}>

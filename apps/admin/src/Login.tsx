@@ -3,9 +3,9 @@ import { Button, Field, Icon, Logo } from '@aquameet/ui';
 import { saveSession, type Session } from './auth';
 
 const FEATURES = [
-  'Wedstrijden, categorieën en deelnemers op één plek',
-  'Live e-jurering met automatische uitslagen',
-  'Publiek scorebord en uitslagen in realtime',
+  'Competitions, categories and participants in one place',
+  'Live e-judging with automatic results',
+  'Public scoreboard and results in real time',
 ];
 
 export function Login({ onLogin }: { onLogin: (s: Session) => void }) {
@@ -15,7 +15,7 @@ export function Login({ onLogin }: { onLogin: (s: Session) => void }) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
-    const session: Session = { email: email.trim(), org: org.trim() || 'Mijn organisatie' };
+    const session: Session = { email: email.trim(), org: org.trim() || 'My organization' };
     saveSession(session);
     onLogin(session);
   };
@@ -25,10 +25,10 @@ export function Login({ onLogin }: { onLogin: (s: Session) => void }) {
       <aside className="aside">
         <Logo />
         <div>
-          <span className="kicker">Wedstrijdplatform voor schoonspringen</span>
-          <h2 style={{ marginTop: 12 }}>Organiseer je wedstrijd van inschrijving tot podium.</h2>
+          <span className="kicker">Competition platform for diving</span>
+          <h2 style={{ marginTop: 12 }}>Run your meet from entry to podium.</h2>
           <p className="lede">
-            Eén professionele omgeving voor de hele wedstrijddag — strak, snel en gemaakt voor gemak.
+            One professional workspace for the whole competition day — clean, fast and built for ease.
           </p>
           <div style={{ marginTop: 28 }}>
             {FEATURES.map((f) => (
@@ -44,25 +44,25 @@ export function Login({ onLogin }: { onLogin: (s: Session) => void }) {
 
       <div className="panel">
         <div className="box">
-          <h1>Welkom terug</h1>
-          <p className="sub">Log in op je organisator-omgeving.</p>
+          <h1>Welcome back</h1>
+          <p className="sub">Sign in to your organizer workspace.</p>
           <form className="col" onSubmit={submit}>
-            <Field label="E-mailadres">
+            <Field label="Email address">
               <input
                 type="email"
-                placeholder="jij@club.nl"
+                placeholder="you@club.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoFocus
               />
             </Field>
-            <Field label="Organisatie / club" hint="Optioneel — verschijnt in je omgeving.">
-              <input placeholder="Zwemvereniging…" value={org} onChange={(e) => setOrg(e.target.value)} />
+            <Field label="Organization / club" hint="Optional — shown in your workspace.">
+              <input placeholder="Swim club…" value={org} onChange={(e) => setOrg(e.target.value)} />
             </Field>
-            <Button type="submit" size="lg" block>Inloggen</Button>
+            <Button type="submit" size="lg" block>Sign in</Button>
           </form>
           <p className="muted" style={{ marginTop: 16, fontSize: '0.82rem' }}>
-            Preview-login — accounts met wachtwoord volgen direct hierna.
+            Preview sign-in — password accounts are coming right after this.
           </p>
         </div>
       </div>

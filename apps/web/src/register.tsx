@@ -19,7 +19,7 @@ export function Join() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    publicApi.get<OpenCompetition[]>('/competitions').then(setComps).catch(() => setError('Kon wedstrijden niet laden.'));
+    publicApi.get<OpenCompetition[]>('/competitions').then(setComps).catch(() => setError('Could not load competitions.'));
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -30,7 +30,7 @@ export function Join() {
       const res = await publicApi.post<{ token: string }>('/register', { competitionId, contactName, contactEmail, clubName });
       setToken(res.token);
     } catch {
-      setError('Aanmelden mislukte. Is de inschrijving nog open?');
+      setError('Sign-up failed. Is registration still open?');
     }
   };
 
@@ -39,11 +39,11 @@ export function Join() {
     return (
       <div className="content" style={SHELL}>
         <Logo />
-        <Card title="Je bent aangemeld 🎉">
-          <p>Bewaar deze persoonlijke link — hiermee beheer je je divers en programma's, en volg je later de updates van de wedstrijd:</p>
+        <Card title="You're signed up 🎉">
+          <p>Keep this personal link — use it to manage your divers and programs, and to follow competition updates later:</p>
           <p><code className="mono" style={{ wordBreak: 'break-all' }}>{link}</code></p>
-          <p className="muted">(In de testfase versturen we nog geen e-mail; bewaar de link of klik hieronder.)</p>
-          <a href={`#/r/${token}`}><Button icon="play">Open mijn inschrijving</Button></a>
+          <p className="muted">(During the preview we don't send email yet; save the link or click below.)</p>
+          <a href={`#/r/${token}`}><Button icon="play">Open my registration</Button></a>
         </Card>
       </div>
     );
@@ -51,23 +51,23 @@ export function Join() {
 
   return (
     <div className="content" style={SHELL}>
-      <div className="between" style={{ marginBottom: 20 }}><Logo /><Badge tone="info">Inschrijven</Badge></div>
-      <Card title="Aanmelden voor een wedstrijd">
+      <div className="between" style={{ marginBottom: 20 }}><Logo /><Badge tone="info">Sign up</Badge></div>
+      <Card title="Sign up for a competition">
         {error ? <p className="muted" style={{ color: 'var(--bad)' }}>{error}</p> : null}
         {comps.length === 0 ? (
-          <EmptyState icon="trophy" title="Geen open inschrijvingen" description="Er staat op dit moment geen wedstrijd open voor inschrijving." />
+          <EmptyState icon="trophy" title="No open registrations" description="There's no competition open for registration right now." />
         ) : (
           <form className="col" onSubmit={submit}>
-            <Field label="Wedstrijd">
+            <Field label="Competition">
               <select value={competitionId} onChange={(e) => setCompetitionId(e.target.value)}>
-                <option value="">— kies wedstrijd —</option>
+                <option value="">— choose competition —</option>
                 {comps.map((w) => <option key={w.id} value={w.id}>{w.name} · {w.date}{w.location ? ` · ${w.location}` : ''}</option>)}
               </select>
             </Field>
-            <Field label="Naam contactpersoon"><input value={contactName} onChange={(e) => setContactName(e.target.value)} /></Field>
-            <Field label="E-mail"><input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} /></Field>
-            <Field label="Club (optioneel)"><input value={clubName} onChange={(e) => setClubName(e.target.value)} /></Field>
-            <Button type="submit" icon="check">Aanmelden</Button>
+            <Field label="Contact name"><input value={contactName} onChange={(e) => setContactName(e.target.value)} /></Field>
+            <Field label="Email"><input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} /></Field>
+            <Field label="Club (optional)"><input value={clubName} onChange={(e) => setClubName(e.target.value)} /></Field>
+            <Button type="submit" icon="check">Sign up</Button>
           </form>
         )}
       </Card>
@@ -97,11 +97,11 @@ export function RegistrationPage({ token }: { token: string }) {
     return (
       <div className="content" style={SHELL}>
         <Logo />
-        <Card title="Link niet gevonden"><p className="muted">Deze inschrijflink is ongeldig of verlopen.</p></Card>
+        <Card title="Link not found"><p className="muted">This sign-up link is invalid or expired.</p></Card>
       </div>
     );
   }
-  if (!data) return <div className="content" style={SHELL}><Logo /><p className="muted">Laden…</p></div>;
+  if (!data) return <div className="content" style={SHELL}><Logo /><p className="muted">Loading…</p></div>;
 
   const locked = data.registration.status === 'submitted';
 
@@ -109,19 +109,19 @@ export function RegistrationPage({ token }: { token: string }) {
     <div className="content" style={SHELL}>
       <div className="between" style={{ marginBottom: 20 }}>
         <Logo />
-        {locked ? <Badge tone="good">Ingediend</Badge> : <Badge tone="warn">Concept</Badge>}
+        {locked ? <Badge tone="good">Submitted</Badge> : <Badge tone="warn">Draft</Badge>}
       </div>
 
-      <Card title={data.competition?.name ?? 'Inschrijving'}>
+      <Card title={data.competition?.name ?? 'Registration'}>
         <p className="muted" style={{ marginTop: 0 }}>
           {data.registration.clubName ? `${data.registration.clubName} · ` : ''}{data.registration.contactName}
           {data.competition?.date ? ` · ${data.competition.date}` : ''}
         </p>
-        {locked ? <p>Je inschrijving is ingediend. Wijzigingen zijn niet meer mogelijk.</p> : null}
+        {locked ? <p>Your registration has been submitted. Changes are no longer possible.</p> : null}
       </Card>
 
       {data.divers.length === 0 ? (
-        <EmptyState icon="users" title="Nog geen divers" description="Voeg hieronder je eerste diver toe." />
+        <EmptyState icon="users" title="No divers yet" description="Add your first diver below." />
       ) : (
         data.divers.map((d) => (
           <DiverBlock key={d.id} token={token} diver={d} data={data} locked={locked} onChange={reload} />
@@ -131,10 +131,10 @@ export function RegistrationPage({ token }: { token: string }) {
       {!locked ? <AddDiver token={token} onAdded={reload} /> : null}
 
       {!locked && data.divers.length > 0 ? (
-        <Card title="Indienen">
-          <p className="muted" style={{ marginTop: 0 }}>Klaar? Dien je inschrijving in. Daarna kun je niet meer wijzigen.</p>
+        <Card title="Submit">
+          <p className="muted" style={{ marginTop: 0 }}>Done? Submit your registration. After that you can't make changes.</p>
           <Button icon="check" onClick={async () => { await publicApi.post(`/registration/${token}/submit`); reload(); }}>
-            Inschrijving indienen
+            Submit registration
           </Button>
         </Card>
       ) : null}
@@ -157,19 +157,19 @@ function AddDiver({ token, onAdded }: { token: string; onAdded: () => void }) {
   };
 
   return (
-    <Card title="Diver toevoegen">
+    <Card title="Add diver">
       <form className="col" onSubmit={add}>
         <div className="grid cols-2">
-          <Field label="Voornaam"><input value={firstName} onChange={(e) => setFirstName(e.target.value)} /></Field>
-          <Field label="Achternaam"><input value={lastName} onChange={(e) => setLastName(e.target.value)} /></Field>
-          <Field label="Geslacht">
+          <Field label="First name"><input value={firstName} onChange={(e) => setFirstName(e.target.value)} /></Field>
+          <Field label="Last name"><input value={lastName} onChange={(e) => setLastName(e.target.value)} /></Field>
+          <Field label="Gender">
             <select value={gender} onChange={(e) => setGender(e.target.value as Gender)}>
-              <option value="F">Meisje/Vrouw</option><option value="M">Jongen/Man</option><option value="X">Overig</option>
+              <option value="F">Female</option><option value="M">Male</option><option value="X">Other</option>
             </select>
           </Field>
-          <Field label="Geboortejaar"><input type="number" value={birthYear} onChange={(e) => setBirthYear(Number(e.target.value))} /></Field>
+          <Field label="Birth year"><input type="number" value={birthYear} onChange={(e) => setBirthYear(Number(e.target.value))} /></Field>
         </div>
-        <Button type="submit" icon="plus">Diver toevoegen</Button>
+        <Button type="submit" icon="plus">Add diver</Button>
       </form>
     </Card>
   );
@@ -184,20 +184,20 @@ function DiverBlock({ token, diver, data, locked, onChange }: {
   const status = (e: Entry) => {
     const cat = catById.get(e.categoryId);
     const sheet = data.sheets[e.id];
-    if (!sheet || sheet.dives.length === 0) return <Badge tone="warn">geen lijst</Badge>;
+    if (!sheet || sheet.dives.length === 0) return <Badge tone="warn">no sheet</Badge>;
     if (!cat) return <Badge tone="neutral">?</Badge>;
     return validateSheet(cat.disciplineId as Discipline, sheet.dives, cat.rules).valid
-      ? <Badge tone="good">geldig</Badge> : <Badge tone="bad">ongeldig</Badge>;
+      ? <Badge tone="good">valid</Badge> : <Badge tone="bad">invalid</Badge>;
   };
 
   return (
     <Card
       title={`${diver.firstName} ${diver.lastName}`}
-      actions={!locked ? <Button variant="danger" onClick={async () => { await publicApi.del(`/registration/${token}/divers/${diver.id}`); onChange(); }}>Verwijderen</Button> : undefined}
+      actions={!locked ? <Button variant="danger" onClick={async () => { await publicApi.del(`/registration/${token}/divers/${diver.id}`); onChange(); }}>Remove</Button> : undefined}
     >
       {myEntries.length > 0 ? (
         <table className="table" style={{ marginBottom: locked ? 0 : 14 }}>
-          <thead><tr><th>Categorie</th><th>Status</th>{!locked ? <th></th> : null}</tr></thead>
+          <thead><tr><th>Category</th><th>Status</th>{!locked ? <th></th> : null}</tr></thead>
           <tbody>
             {myEntries.map((e) => (
               <tr key={e.id}>
@@ -208,7 +208,7 @@ function DiverBlock({ token, diver, data, locked, onChange }: {
             ))}
           </tbody>
         </table>
-      ) : <p className="muted">Nog geen programma's.</p>}
+      ) : <p className="muted">No programs yet.</p>}
 
       {!locked ? <AddProgram token={token} diver={diver} categories={data.categories} onSaved={onChange} /> : null}
     </Card>
@@ -246,31 +246,31 @@ function AddProgram({ token, diver, categories, onSaved }: {
 
   return (
     <div className="col" style={{ marginTop: 6, paddingTop: 12, borderTop: '1px solid var(--line-soft)' }}>
-      <Field label="Programma toevoegen — kies categorie">
+      <Field label="Add a program — choose category">
         <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-          <option value="">— kies categorie —</option>
-          {categories.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.rules.diveCount} sprongen)</option>)}
+          <option value="">— choose category —</option>
+          {categories.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.rules.diveCount} dives)</option>)}
         </select>
       </Field>
       {category ? (
         <>
-          <Field label="Sprongen" hint="Eén per regel: code positie — bv. 5253 B">
+          <Field label="Dives" hint="One per line: code position — e.g. 5253 B">
             <textarea value={text} onChange={(e) => setText(e.target.value)} rows={7} placeholder={'101 B\n201 B\n301 B'} />
           </Field>
           {dives.length > 0 && result ? (
             result.valid ? (
-              <Badge tone="good">Geldig · totaal DD {result.totalDd.toFixed(1)}</Badge>
+              <Badge tone="good">Valid · total DD {result.totalDd.toFixed(1)}</Badge>
             ) : (
               <div className="col" style={{ gap: 6 }}>
                 {result.issues.map((iss, i) => (
                   <span key={i} className="dim" style={{ fontSize: '0.9rem' }}>
-                    <Badge tone="bad">{iss.code}</Badge> {iss.message}{iss.diveIndex !== undefined ? ` (regel ${iss.diveIndex + 1})` : ''}
+                    <Badge tone="bad">{iss.code}</Badge> {iss.message}{iss.diveIndex !== undefined ? ` (line ${iss.diveIndex + 1})` : ''}
                   </span>
                 ))}
               </div>
             )
           ) : null}
-          <Button icon="check" disabled={!canSave} onClick={save}>{saving ? 'Opslaan…' : 'Programma opslaan'}</Button>
+          <Button icon="check" disabled={!canSave} onClick={save}>{saving ? 'Saving…' : 'Save program'}</Button>
         </>
       ) : null}
     </div>

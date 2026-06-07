@@ -11,9 +11,9 @@ function diverLabel(d: Diver | undefined): string {
 }
 
 /**
- * Enrollment flow: pick a category, see who's entered, and enroll a diver with
- * their dive sheet — validated inline against the category's rules at the
- * moment of entry (not as a separate admin step).
+ * Entry flow: pick a category, see who's entered, and enroll a diver with their
+ * dive sheet — validated inline against the category's rules at the moment of
+ * entry (not as a separate admin step).
  */
 export function Enrollment() {
   const categories = useCollection<Category>('/categories');
@@ -27,17 +27,17 @@ export function Enrollment() {
   return (
     <>
       <div className="page-head">
-        <h1>Inschrijvingen</h1>
-        <p>Schrijf divers in per categorie en vul hun programma in — de sprongenlijst wordt meteen tegen de categorieregels gecontroleerd.</p>
+        <h1>Entries</h1>
+        <p>Enter divers per category and fill in their program — the dive sheet is checked against the category rules right away.</p>
       </div>
 
-      <Card title="Categorie">
+      <Card title="Category">
         {categories.items.length === 0 ? (
-          <EmptyState icon="layers" title="Nog geen categorieën" description="Maak eerst een categorie aan onder Categorieën." />
+          <EmptyState icon="layers" title="No categories yet" description="Create a category first under Categories." />
         ) : (
-          <Field label="Kies de categorie waarvoor je inschrijft">
+          <Field label="Choose the category you're entering for">
             <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-              <option value="">— kies categorie —</option>
+              <option value="">— choose category —</option>
               {categories.items.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}{compName(c.competitionId) ? ` · ${compName(c.competitionId)}` : ''}
@@ -74,14 +74,14 @@ function CategoryEnrollment({ category, divers }: { category: Category; divers: 
     <div className="grid cols-2" style={{ marginTop: 18 }}>
       <EnrollForm category={category} discipline={discipline} available={available} onSaved={refreshEntries} />
 
-      <Card title="Ingeschreven" actions={<Badge tone="info">{entries.length}</Badge>}>
+      <Card title="Entered" actions={<Badge tone="info">{entries.length}</Badge>}>
         <p className="muted" style={{ marginTop: 0 }}>
-          Regels: {category.rules.diveCount} sprongen
-          {category.rules.requireDistinctGroups ? ` · min. ${category.rules.requireDistinctGroups} groepen` : ''}
-          {category.rules.maxTotalDd ? ` · max. DD ${category.rules.maxTotalDd}` : ''} · onderdeel {category.disciplineId}
+          Rules: {category.rules.diveCount} dives
+          {category.rules.requireDistinctGroups ? ` · min. ${category.rules.requireDistinctGroups} groups` : ''}
+          {category.rules.maxTotalDd ? ` · max. DD ${category.rules.maxTotalDd}` : ''} · event {category.disciplineId}
         </p>
-        {loading ? <p className="muted">Laden…</p> : entries.length === 0 ? (
-          <EmptyState icon="users" title="Nog niemand ingeschreven" description="Voeg links de eerste diver met programma toe." />
+        {loading ? <p className="muted">Loading…</p> : entries.length === 0 ? (
+          <EmptyState icon="users" title="Nobody entered yet" description="Add the first diver with a program on the left." />
         ) : (
           <div className="col">
             {entries.map((e) => (
@@ -127,23 +127,23 @@ function EnrollForm({
   };
 
   return (
-    <Card title="Diver inschrijven">
+    <Card title="Enter a diver">
       <div className="col">
         <Field label="Diver">
           <select value={diverId} onChange={(e) => setDiverId(e.target.value)}>
-            <option value="">— kies diver —</option>
+            <option value="">— choose diver —</option>
             {available.map((d) => <option key={d.id} value={d.id}>{diverLabel(d)} ({d.birthYear})</option>)}
           </select>
         </Field>
-        {available.length === 0 ? <p className="muted">Alle bekende divers zijn al ingeschreven (of voeg er meer toe onder Deelnemers).</p> : null}
+        {available.length === 0 ? <p className="muted">All known divers are already entered (or add more under Participants).</p> : null}
 
-        <Field label="Programma (sprongenlijst)" hint="Eén per regel: code positie — bv. 5253 B">
+        <Field label="Program (dive sheet)" hint="One per line: code position — e.g. 5253 B">
           <textarea value={text} onChange={(e) => setText(e.target.value)} rows={8} placeholder={EXAMPLE} />
         </Field>
 
         <div className="grid cols-2">
-          <Stat label="Totaal DD" value={result.totalDd.toFixed(1)} />
-          <Stat label="Sprongen" value={`${dives.length} / ${category.rules.diveCount}`} />
+          <Stat label="Total DD" value={result.totalDd.toFixed(1)} />
+          <Stat label="Dives" value={`${dives.length} / ${category.rules.diveCount}`} />
         </div>
 
         {dives.length > 0 && result.issues.length > 0 ? (
@@ -152,20 +152,20 @@ function EnrollForm({
               <div className="row" key={i} style={{ gap: 10, alignItems: 'flex-start' }}>
                 <span style={{ color: 'var(--bad)', marginTop: 2 }}><Icon name="alert" /></span>
                 <span className="col" style={{ gap: 2 }}>
-                  <span><Badge tone="bad">{issue.code}</Badge>{issue.diveIndex !== undefined ? <span className="muted" style={{ marginLeft: 8 }}>regel {issue.diveIndex + 1}</span> : null}</span>
+                  <span><Badge tone="bad">{issue.code}</Badge>{issue.diveIndex !== undefined ? <span className="muted" style={{ marginLeft: 8 }}>line {issue.diveIndex + 1}</span> : null}</span>
                   <span className="dim" style={{ fontSize: '0.9rem' }}>{issue.message}</span>
                 </span>
               </div>
             ))}
           </div>
         ) : dives.length > 0 ? (
-          <Badge tone="good">Programma is geldig</Badge>
+          <Badge tone="good">Program is valid</Badge>
         ) : null}
 
         <Button icon="check" disabled={!canSave} onClick={save}>
-          {saving ? 'Opslaan…' : 'Inschrijven'}
+          {saving ? 'Saving…' : 'Enter'}
         </Button>
-        {!result.valid && dives.length > 0 ? <p className="muted">Los eerst de problemen op voordat je kunt inschrijven.</p> : null}
+        {!result.valid && dives.length > 0 ? <p className="muted">Fix the issues before you can enter.</p> : null}
       </div>
     </Card>
   );
@@ -183,10 +183,10 @@ function EntryRow({
 
   const status = (() => {
     if (!loaded) return <Badge tone="info">…</Badge>;
-    if (!sheet || sheet.dives.length === 0) return <Badge tone="warn">geen lijst</Badge>;
+    if (!sheet || sheet.dives.length === 0) return <Badge tone="warn">no sheet</Badge>;
     return validateSheet(discipline, sheet.dives, category.rules).valid
-      ? <Badge tone="good">geldig</Badge>
-      : <Badge tone="bad">ongeldig</Badge>;
+      ? <Badge tone="good">valid</Badge>
+      : <Badge tone="bad">invalid</Badge>;
   })();
 
   return (
@@ -194,9 +194,9 @@ function EntryRow({
       <span className="row" style={{ gap: 10 }}>
         {status}
         <b>{diverName}</b>
-        <span className="muted">{sheet ? `${sheet.dives.length} sprongen` : ''}</span>
+        <span className="muted">{sheet ? `${sheet.dives.length} dives` : ''}</span>
       </span>
-      <Button variant="danger" onClick={onRemove}>Uitschrijven</Button>
+      <Button variant="danger" onClick={onRemove}>Remove</Button>
     </div>
   );
 }

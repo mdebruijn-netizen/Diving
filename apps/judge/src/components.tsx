@@ -30,12 +30,12 @@ export function JudgePad({ client, send, projection, seat }: PanelProps & { seat
     <div className="content" style={{ maxWidth: 520, margin: '0 auto', padding: '28px 20px' }}>
       <div className="between" style={{ marginBottom: 18 }}>
         <Logo />
-        <Badge tone="info">Stoel {seat}</Badge>
+        <Badge tone="info">Seat {seat}</Badge>
       </div>
-      <Card title="Jurycijfer">
+      <Card title="Judge award">
         {diveId ? (
           <>
-            <p className="muted">Sprong: {diveId}</p>
+            <p className="muted">Dive: {diveId}</p>
             <div className="pad-grid">
               {SCORE_STEPS.map((value) => (
                 <button
@@ -50,10 +50,10 @@ export function JudgePad({ client, send, projection, seat }: PanelProps & { seat
                 </button>
               ))}
             </div>
-            {sent !== null && <p className="kicker" style={{ marginTop: 16 }}>Ingestuurd: {sent.toFixed(1)}</p>}
+            {sent !== null && <p className="kicker" style={{ marginTop: 16 }}>Submitted: {sent.toFixed(1)}</p>}
           </>
         ) : (
-          <p className="muted">Wachten op een open sprong…</p>
+          <p className="muted">Waiting for an open dive…</p>
         )}
       </Card>
     </div>
@@ -79,22 +79,22 @@ export function RecorderPanel({ client, send, projection }: PanelProps) {
         <Badge tone="good">Recorder</Badge>
       </div>
 
-      <Card title="Nieuwe sprong">
+      <Card title="New dive">
         <div className="grid cols-3" style={{ marginBottom: 14 }}>
-          <Field label="Deelnemer"><input value={diver} onChange={(e) => setDiver(e.target.value)} /></Field>
+          <Field label="Participant"><input value={diver} onChange={(e) => setDiver(e.target.value)} /></Field>
           <Field label="DD"><input type="number" step="0.1" value={dd} onChange={(e) => setDd(Number(e.target.value))} /></Field>
-          <Field label="Juryleden"><input type="number" value={panelSize} onChange={(e) => setPanelSize(Number(e.target.value))} /></Field>
+          <Field label="Judges"><input type="number" value={panelSize} onChange={(e) => setPanelSize(Number(e.target.value))} /></Field>
         </div>
-        <Button icon="play" onClick={openDive}>Sprong openen</Button>
+        <Button icon="play" onClick={openDive}>Open dive</Button>
       </Card>
 
       {diveId && (
-        <Card title="Actieve sprong" className="" >
+        <Card title="Active dive" className="" >
           <p className="muted" style={{ marginBottom: 12 }}>{diveId}</p>
           <div className="row wrap">
-            <Button variant="ghost" onClick={() => send(client.makeEvent({ type: 'LockDive', diveId }))}>Lock sprong</Button>
+            <Button variant="ghost" onClick={() => send(client.makeEvent({ type: 'LockDive', diveId }))}>Lock dive</Button>
             <Button variant="ghost" onClick={() => send(client.makeEvent({ type: 'DeclarePenalty', diveId, penalty: { type: 'balk' } }))}>Balk (−2)</Button>
-            <Button variant="danger" onClick={() => send(client.makeEvent({ type: 'DeclarePenalty', diveId, penalty: { type: 'failed' } }))}>Mislukt (0)</Button>
+            <Button variant="danger" onClick={() => send(client.makeEvent({ type: 'DeclarePenalty', diveId, penalty: { type: 'failed' } }))}>Failed (0)</Button>
           </div>
         </Card>
       )}

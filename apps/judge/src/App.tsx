@@ -27,7 +27,7 @@ export function App() {
     return (
       <div className="screen">
         <Logo />
-        <p className="muted">Verbinden met sessie {sessionId}…</p>
+        <p className="muted">Connecting to session {sessionId}…</p>
       </div>
     );
   }

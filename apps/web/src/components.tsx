@@ -9,16 +9,16 @@ export function Results({ projection }: { projection: SessionProjection }) {
     <div className="content" style={{ maxWidth: 760, margin: '0 auto', padding: '40px 20px' }}>
       <div className="between" style={{ marginBottom: 20 }}>
         <Logo />
-        <Badge tone="info">Live uitslag</Badge>
+        <Badge tone="info">Live results</Badge>
       </div>
-      <Card title="Uitslag">
+      <Card title="Results">
         {hasResults(projection) ? (
           <table className="table">
             <thead>
               <tr>
                 <th style={{ width: 56 }}>#</th>
-                <th>Deelnemer</th>
-                <th className="num">Totaal</th>
+                <th>Participant</th>
+                <th className="num">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -32,7 +32,7 @@ export function Results({ projection }: { projection: SessionProjection }) {
             </tbody>
           </table>
         ) : (
-          <EmptyState icon="trophy" title="Nog geen uitslagen" description="Zodra de jury cijfers geeft, verschijnen de resultaten hier live." />
+          <EmptyState icon="trophy" title="No results yet" description="As soon as the judges score, results appear here live." />
         )}
       </Card>
     </div>
@@ -50,13 +50,13 @@ export function Scoreboard({ projection }: { projection: SessionProjection }) {
         <Badge tone="info">Live</Badge>
       </div>
       <div className="now">
-        <span className="lbl">{dive ? (dive.pending ? 'Aan de beurt' : 'Laatste sprong') : 'Wachten op de start'}</span>
+        <span className="lbl">{dive ? (dive.pending ? 'Up next' : 'Last dive') : 'Waiting for the start'}</span>
         <span className="who">{dive?.entryId ?? '—'}</span>
         <span className="score mono">{formatScore(dive?.score)}</span>
       </div>
       {leader && (
         <div className="leader">
-          Leider:&nbsp;<b>{leader.entryId}</b>&nbsp;— {formatScore(leader.total)}
+          Leader:&nbsp;<b>{leader.entryId}</b>&nbsp;— {formatScore(leader.total)}
         </div>
       )}
     </div>

@@ -167,7 +167,7 @@ export function AppShell({
           {user && <span className="muted" style={{ fontSize: '0.84rem', padding: '0 12px' }}>{user}</span>}
           {onSignOut && (
             <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); onSignOut(); }}>
-              <Icon name="logout" /> Uitloggen
+              <Icon name="logout" /> Sign out
             </a>
           )}
         </div>

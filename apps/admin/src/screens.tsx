@@ -18,35 +18,35 @@ export function Dashboard({ session }: { session: Session }) {
   return (
     <>
       <div className="page-head">
-        <h1>Welkom, {session.org}</h1>
-        <p>Hier bestuur je je wedstrijden. Begin met een nieuwe wedstrijd of controleer een sprongenlijst.</p>
+        <h1>Welcome, {session.org}</h1>
+        <p>Run your competitions from here. Start with a new competition or check a dive sheet.</p>
       </div>
 
       <div className="grid cols-4">
-        <Stat label="Wedstrijden" value={competitions.items.length} hint={competitions.items.length ? 'Beheren' : 'Nog geen wedstrijd'} icon="trophy" />
-        <Stat label="Deelnemers" value={divers.items.length} hint={divers.items.length ? 'Ingeschreven' : 'Voeg divers toe'} icon="users" />
-        <Stat label="Categorieën" value={categories.items.length} hint="Geslacht × leeftijd" icon="layers" />
-        <Stat label="Live sessies" value="0" hint="Niets actief" icon="broadcast" />
+        <Stat label="Competitions" value={competitions.items.length} hint={competitions.items.length ? 'Manage' : 'No competitions yet'} icon="trophy" />
+        <Stat label="Participants" value={divers.items.length} hint={divers.items.length ? 'Registered' : 'Add divers'} icon="users" />
+        <Stat label="Categories" value={categories.items.length} hint="Gender × age" icon="layers" />
+        <Stat label="Live sessions" value="0" hint="Nothing active" icon="broadcast" />
       </div>
 
       <div className="grid cols-2" style={{ marginTop: 18 }}>
-        <Card title="Snel aan de slag">
+        <Card title="Quick start">
           <div className="col">
-            <QuickAction icon="trophy" title="Nieuwe wedstrijd" desc="Datum, locatie en onderdelen instellen." onClick={() => go('#/events')} />
-            <QuickAction icon="users" title="Deelnemers toevoegen" desc="Importeer of voeg divers en clubs toe." onClick={() => go('#/participants')} />
-            <QuickAction icon="clipboard" title="Diver inschrijven" desc="Schrijf in met programma — meteen gevalideerd." onClick={() => go('#/enroll')} />
+            <QuickAction icon="trophy" title="New competition" desc="Set date, location and events." onClick={() => go('#/events')} />
+            <QuickAction icon="users" title="Add participants" desc="Import or add divers and clubs." onClick={() => go('#/participants')} />
+            <QuickAction icon="clipboard" title="Enter a diver" desc="Enter with a program — validated instantly." onClick={() => go('#/enroll')} />
           </div>
         </Card>
 
-        <Card title="Aan de slag">
+        <Card title="Getting started">
           <div className="col">
-            <Step done title="Account aangemaakt" />
-            <Step title="Eerste wedstrijd aanmaken" />
-            <Step title="Categorieën & deelnemers instellen" />
-            <Step title="Live e-jurering starten" />
+            <Step done title="Account created" />
+            <Step title="Create your first competition" />
+            <Step title="Set up categories & participants" />
+            <Step title="Start live e-judging" />
           </div>
           <div style={{ marginTop: 16 }}>
-            <Button icon="plus" onClick={() => go('#/events')}>Nieuwe wedstrijd</Button>
+            <Button icon="plus" onClick={() => go('#/events')}>New competition</Button>
           </div>
         </Card>
       </div>
@@ -103,49 +103,49 @@ export function Validate() {
   return (
     <>
       <div className="page-head">
-        <h1>Programma testen</h1>
-        <p>Snel een losse sprongenlijst uitproberen tegen de FINA 2017–2021 DD-tabel — handig voor aangepaste of uitzonderingsschema's. Inschrijven doe je onder Inschrijvingen, daar wordt automatisch gevalideerd.</p>
+        <h1>Sheet checker</h1>
+        <p>Quickly try a standalone dive sheet against the FINA 2017–2021 DD table — handy for custom or exception schemes. Entering divers is done under Entries, where sheets are validated automatically.</p>
       </div>
 
       <div className="grid cols-2">
-        <Card title="Sprongenlijst">
+        <Card title="Dive sheet">
           <div className="grid cols-2" style={{ marginBottom: 14 }}>
-            <Field label="Onderdeel">
+            <Field label="Event">
               <select value={discipline} onChange={(e) => setDiscipline(e.target.value as Discipline)}>
                 {DISCIPLINES.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>
             </Field>
-            <Field label="Aantal sprongen">
+            <Field label="Number of dives">
               <input type="number" value={diveCount} onChange={(e) => setDiveCount(Number(e.target.value))} />
             </Field>
-            <Field label="Min. groepen">
+            <Field label="Min. groups">
               <input type="number" value={distinctGroups} onChange={(e) => setDistinctGroups(Number(e.target.value))} />
             </Field>
-            <Field label="Max. totaal-DD" hint="Leeg = geen limiet">
+            <Field label="Max. total DD" hint="Empty = no limit">
               <input type="number" value={maxTotalDd} onChange={(e) => setMaxTotalDd(e.target.value === '' ? '' : Number(e.target.value))} />
             </Field>
           </div>
-          <Field label="Sprongen" hint="Eén per regel: code positie (bv. 5253 B)">
+          <Field label="Dives" hint="One per line: code position (e.g. 5253 B)">
             <textarea value={text} onChange={(e) => setText(e.target.value)} rows={9} />
           </Field>
         </Card>
 
         <div className="col">
-          <Card title="Resultaat" actions={result.valid ? <Badge tone="good">Geldig</Badge> : <Badge tone="bad">Ongeldig</Badge>}>
+          <Card title="Result" actions={result.valid ? <Badge tone="good">Valid</Badge> : <Badge tone="bad">Invalid</Badge>}>
             <div className="grid cols-2">
-              <Stat label="Totaal DD" value={result.totalDd.toFixed(1)} />
-              <Stat label="Problemen" value={String(result.issues.length)} />
+              <Stat label="Total DD" value={result.totalDd.toFixed(1)} />
+              <Stat label="Issues" value={String(result.issues.length)} />
             </div>
           </Card>
 
           {result.issues.length > 0 ? (
-            <Card title="Problemen">
+            <Card title="Issues">
               <div className="col">
                 {result.issues.map((issue, i) => (
                   <div className="row" key={i} style={{ gap: 10, alignItems: 'flex-start' }}>
                     <span style={{ color: 'var(--bad)', marginTop: 2 }}><Icon name="alert" /></span>
                     <span className="col" style={{ gap: 2 }}>
-                      <span><Badge tone="bad">{issue.code}</Badge>{issue.diveIndex !== undefined ? <span className="muted" style={{ marginLeft: 8 }}>regel {issue.diveIndex + 1}</span> : null}</span>
+                      <span><Badge tone="bad">{issue.code}</Badge>{issue.diveIndex !== undefined ? <span className="muted" style={{ marginLeft: 8 }}>line {issue.diveIndex + 1}</span> : null}</span>
                       <span className="dim" style={{ fontSize: '0.9rem' }}>{issue.message}</span>
                     </span>
                   </div>
@@ -153,8 +153,8 @@ export function Validate() {
               </div>
             </Card>
           ) : (
-            <Card title="Problemen">
-              <EmptyState icon="check" title="Alles in orde" description="Deze lijst voldoet aan alle ingestelde regels." />
+            <Card title="Issues">
+              <EmptyState icon="check" title="All good" description="This sheet meets every configured rule." />
             </Card>
           )}
         </div>
@@ -173,7 +173,7 @@ export function Stub({ title, description, icon, cta }: { title: string; descrip
       <Card>
         <EmptyState
           icon={icon}
-          title={`${title} — binnenkort`}
+          title={`${title} — coming soon`}
           description={description}
           action={cta ? <Button icon="plus">{cta}</Button> : undefined}
         />

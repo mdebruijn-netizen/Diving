@@ -6,14 +6,14 @@ import { Enrollment } from './enroll';
 
 const NAV: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '#/' },
-  { id: 'events', label: 'Wedstrijden', icon: 'trophy', href: '#/events' },
-  { id: 'participants', label: 'Deelnemers', icon: 'users', href: '#/participants' },
-  { id: 'categories', label: 'Categorieën', icon: 'layers', href: '#/categories' },
-  { id: 'enroll', label: 'Inschrijvingen', icon: 'clipboard', href: '#/enroll' },
-  { id: 'registrations', label: 'Aanmeldingen', icon: 'users', href: '#/registrations' },
-  { id: 'sheets', label: 'Programma testen', icon: 'clipboard', href: '#/sheets' },
+  { id: 'events', label: 'Competitions', icon: 'trophy', href: '#/events' },
+  { id: 'participants', label: 'Participants', icon: 'users', href: '#/participants' },
+  { id: 'categories', label: 'Categories', icon: 'layers', href: '#/categories' },
+  { id: 'enroll', label: 'Entries', icon: 'clipboard', href: '#/enroll' },
+  { id: 'registrations', label: 'Sign-ups', icon: 'users', href: '#/registrations' },
+  { id: 'sheets', label: 'Sheet checker', icon: 'clipboard', href: '#/sheets' },
   { id: 'live', label: 'Live', icon: 'broadcast', href: '#/live' },
-  { id: 'settings', label: 'Instellingen', icon: 'settings', href: '#/settings' },
+  { id: 'settings', label: 'Settings', icon: 'settings', href: '#/settings' },
 ];
 
 export function Console({ session, onSignOut }: { session: Session; onSignOut: () => void }) {
@@ -36,9 +36,9 @@ export function Console({ session, onSignOut }: { session: Session; onSignOut: (
       case 'categories':
         return <Categories />;
       case 'live':
-        return <Stub title="Live bediening" icon="broadcast" description="Open sprongen, volg de jury en stuur het scorebord aan tijdens de wedstrijd." />;
+        return <Stub title="Live control" icon="broadcast" description="Open dives, follow the judges and drive the scoreboard during the meet." />;
       case 'settings':
-        return <Stub title="Instellingen" icon="settings" description="Organisatieprofiel, abonnement en teamleden." />;
+        return <Stub title="Settings" icon="settings" description="Organization profile, subscription and team members." />;
       default:
         return <Dashboard session={session} />;
     }

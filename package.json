@@ -17,7 +17,9 @@
     "build:admin": "pnpm --filter @aquameet/admin build",
     "build:frontends": "pnpm build:web && pnpm build:judge && pnpm build:admin",
     "build:all": "pnpm build:frontends && node scripts/assemble-assets.mjs",
-    "build": "pnpm build:all"
+    "build": "pnpm build:all",
+    "db:migrate": "pnpm exec wrangler d1 execute aquameet --remote --file=apps/api/migrations/0001_init.sql -c apps/api/wrangler.toml",
+    "deploy": "pnpm build:all && pnpm exec wrangler deploy -c apps/api/wrangler.toml"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
