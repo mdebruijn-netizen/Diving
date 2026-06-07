@@ -11,8 +11,13 @@ class_name = "SessionDO"
 tag = "v1"
 new_classes = ["SessionDO"]
 
-# Tenant database. Apply packages/persistence SCHEMA_SQL on provisioning.
+# Tenant database. Apply apps/api/migrations/0001_init.sql on provisioning.
 [[d1_databases]]
 binding = "DB"
 database_name = "aquameet"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "4850f07c-fb62-46d4-a5d8-b389e4fa8b96"
+
+# Object storage for documents, result exports and dive video.
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "aquameet"
