@@ -51,6 +51,10 @@ export class SessionDO {
     server.accept();
     this.sockets.add(server);
 
+    // Send the current state immediately so a new viewer renders right away
+    // (an empty session shows "no results yet" instead of "connecting…").
+    server.send(JSON.stringify({ type: 'projection', projection: this.controller.projection() }));
+
     server.addEventListener('message', async (event: MessageEvent) => {
       try {
         const data = typeof event.data === 'string' ? event.data : '';

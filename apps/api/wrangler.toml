@@ -26,3 +26,13 @@ database_id = "4850f07c-fb62-46d4-a5d8-b389e4fa8b96"
 [[r2_buckets]]
 binding = "BUCKET"
 bucket_name = "aquameet"
+
+# Observability — keep config consistent with the Cloudflare dashboard.
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
