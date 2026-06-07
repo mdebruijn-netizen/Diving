@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Logo } from '@aquameet/ui';
 import type { ActorRole } from '@aquameet/sync';
 import { SessionClient } from './client';
 import { JudgePad, RecorderPanel } from './components';
@@ -23,7 +24,12 @@ export function App() {
   );
 
   if (!connected) {
-    return <main className="loading">Verbinden met sessie {sessionId}…</main>;
+    return (
+      <div className="screen">
+        <Logo />
+        <p className="muted">Verbinden met sessie {sessionId}…</p>
+      </div>
+    );
   }
   return role === 'recorder' || role === 'referee' ? (
     <RecorderPanel client={client} send={send} projection={projection} />

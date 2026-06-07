@@ -12,6 +12,7 @@
   "dependencies": {
     "@aquameet/competition": "workspace:*",
     "@aquameet/sync": "workspace:*",
+    "@aquameet/ui": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

@@ -1,33 +1,41 @@
+import { Badge, Card, EmptyState, Logo } from '@aquameet/ui';
 import type { SessionProjection } from '@aquameet/sync';
 import { currentDive, formatScore, hasResults, rankedRows } from './view-model';
 
 /** Public results screen: the live ranking for a session. */
 export function Results({ projection }: { projection: SessionProjection }) {
-  if (!hasResults(projection)) {
-    return <main className="empty">Nog geen uitslagen.</main>;
-  }
+  const rows = rankedRows(projection);
   return (
-    <main className="results">
-      <h1>Uitslag</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Deelnemer</th>
-            <th>Totaal</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rankedRows(projection).map((row) => (
-            <tr key={row.entryId}>
-              <td>{row.rank}</td>
-              <td>{row.entryId}</td>
-              <td>{formatScore(row.total)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </main>
+    <div className="content" style={{ maxWidth: 760, margin: '0 auto', padding: '40px 20px' }}>
+      <div className="between" style={{ marginBottom: 20 }}>
+        <Logo />
+        <Badge tone="info">Live uitslag</Badge>
+      </div>
+      <Card title="Uitslag">
+        {hasResults(projection) ? (
+          <table className="table">
+            <thead>
+              <tr>
+                <th style={{ width: 56 }}>#</th>
+                <th>Deelnemer</th>
+                <th className="num">Totaal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.entryId}>
+                  <td className="rank">{row.rank}</td>
+                  <td>{row.entryId}</td>
+                  <td className="num">{formatScore(row.total)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <EmptyState icon="trophy" title="Nog geen uitslagen" description="Zodra de jury cijfers geeft, verschijnen de resultaten hier live." />
+        )}
+      </Card>
+    </div>
   );
 }
 
@@ -36,23 +44,21 @@ export function Scoreboard({ projection }: { projection: SessionProjection }) {
   const dive = currentDive(projection);
   const leader = rankedRows(projection)[0];
   return (
-    <main className="scoreboard">
-      {dive ? (
-        <section className="now">
-          <span className="label">{dive.pending ? 'Aan de beurt' : 'Laatste sprong'}</span>
-          <span className="entry">{dive.entryId}</span>
-          <span className="score">{formatScore(dive.score)}</span>
-        </section>
-      ) : (
-        <section className="now">
-          <span className="label">Wachten op de eerste sprong…</span>
-        </section>
-      )}
+    <div className="board">
+      <div className="head">
+        <Logo />
+        <Badge tone="info">Live</Badge>
+      </div>
+      <div className="now">
+        <span className="lbl">{dive ? (dive.pending ? 'Aan de beurt' : 'Laatste sprong') : 'Wachten op de start'}</span>
+        <span className="who">{dive?.entryId ?? '—'}</span>
+        <span className="score mono">{formatScore(dive?.score)}</span>
+      </div>
       {leader && (
-        <footer className="leader">
-          Leider: {leader.entryId} — {formatScore(leader.total)}
-        </footer>
+        <div className="leader">
+          Leider:&nbsp;<b>{leader.entryId}</b>&nbsp;— {formatScore(leader.total)}
+        </div>
       )}
-    </main>
+    </div>
   );
 }

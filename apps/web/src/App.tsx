@@ -1,3 +1,4 @@
+import { Logo } from '@aquameet/ui';
 import { Results, Scoreboard } from './components';
 import { useSession } from './useSession';
 
@@ -13,11 +14,12 @@ export function App() {
 
   const projection = useSession(apiBase, sessionId);
   if (!projection) {
-    return <main className="loading">Verbinden met sessie {sessionId}…</main>;
+    return (
+      <div className="screen">
+        <Logo />
+        <p className="muted">Verbinden met sessie {sessionId}…</p>
+      </div>
+    );
   }
-  return view === 'scoreboard' ? (
-    <Scoreboard projection={projection} />
-  ) : (
-    <Results projection={projection} />
-  );
+  return view === 'scoreboard' ? <Scoreboard projection={projection} /> : <Results projection={projection} />;
 }

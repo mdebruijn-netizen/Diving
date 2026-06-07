@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Badge, Button, Card, Field, Logo } from '@aquameet/ui';
 import type { EventEnvelope, SessionProjection } from '@aquameet/sync';
 import { SCORE_STEPS, type SessionClient } from './client';
 
@@ -8,7 +9,6 @@ interface PanelProps {
   projection: SessionProjection | null;
 }
 
-/** The dive currently awaiting scores, if any. */
 function openDiveId(projection: SessionProjection | null): string | undefined {
   return projection?.dives.find((d) => d.status === 'OPEN')?.diveId;
 }
@@ -18,46 +18,49 @@ export function JudgePad({ client, send, projection, seat }: PanelProps & { seat
   const [sent, setSent] = useState<number | null>(null);
   const diveId = openDiveId(projection);
 
-  // Claim this seat once on mount so the diver's scores from this device count.
   useEffect(() => {
     send(client.makeEvent({ type: 'AssignSeat', panelSeat: seat, judgeId: `seat-${seat}` }));
   }, [client, send, seat]);
 
-  // Reset the highlighted award when a new dive opens.
   useEffect(() => {
     setSent(null);
   }, [diveId]);
 
   return (
-    <main className="judge">
-      <h1>Jurylid — stoel {seat}</h1>
-      {diveId ? (
-        <>
-          <p className="dive">Sprong: {diveId}</p>
-          <div className="pad">
-            {SCORE_STEPS.map((value) => (
-              <button
-                key={value}
-                className={sent === value ? 'selected' : ''}
-                onClick={() => {
-                  send(client.submitScore(diveId, seat, value));
-                  setSent(value);
-                }}
-              >
-                {value.toFixed(1)}
-              </button>
-            ))}
-          </div>
-          {sent !== null && <p className="confirm">Ingestuurd: {sent.toFixed(1)}</p>}
-        </>
-      ) : (
-        <p className="idle">Wachten op een open sprong…</p>
-      )}
-    </main>
+    <div className="content" style={{ maxWidth: 520, margin: '0 auto', padding: '28px 20px' }}>
+      <div className="between" style={{ marginBottom: 18 }}>
+        <Logo />
+        <Badge tone="info">Stoel {seat}</Badge>
+      </div>
+      <Card title="Jurycijfer">
+        {diveId ? (
+          <>
+            <p className="muted">Sprong: {diveId}</p>
+            <div className="pad-grid">
+              {SCORE_STEPS.map((value) => (
+                <button
+                  key={value}
+                  className={sent === value ? 'selected' : ''}
+                  onClick={() => {
+                    send(client.submitScore(diveId, seat, value));
+                    setSent(value);
+                  }}
+                >
+                  {value.toFixed(1)}
+                </button>
+              ))}
+            </div>
+            {sent !== null && <p className="kicker" style={{ marginTop: 16 }}>Ingestuurd: {sent.toFixed(1)}</p>}
+          </>
+        ) : (
+          <p className="muted">Wachten op een open sprong…</p>
+        )}
+      </Card>
+    </div>
   );
 }
 
-/** Recorder controls: open a dive, lock it, declare a penalty, manual backup. */
+/** Recorder controls: open a dive, lock it, declare a penalty. */
 export function RecorderPanel({ client, send, projection }: PanelProps) {
   const [diver, setDiver] = useState('Diver 1');
   const [dd, setDd] = useState(3.0);
@@ -66,65 +69,35 @@ export function RecorderPanel({ client, send, projection }: PanelProps) {
 
   const openDive = () => {
     const id = `d-${Math.random().toString(36).slice(2, 7)}`;
-    send(
-      client.makeEvent({
-        type: 'OpenDive',
-        diveId: id,
-        entryId: diver,
-        kind: 'individual',
-        dd,
-        panelSize,
-      }),
-    );
+    send(client.makeEvent({ type: 'OpenDive', diveId: id, entryId: diver, kind: 'individual', dd, panelSize }));
   };
 
   return (
-    <main className="recorder">
-      <h1>Recorder</h1>
+    <div className="content" style={{ maxWidth: 640, margin: '0 auto', padding: '28px 20px' }}>
+      <div className="between" style={{ marginBottom: 18 }}>
+        <Logo />
+        <Badge tone="good">Recorder</Badge>
+      </div>
 
-      <section className="open-dive">
-        <h2>Nieuwe sprong</h2>
-        <label>
-          Deelnemer
-          <input value={diver} onChange={(e) => setDiver(e.target.value)} />
-        </label>
-        <label>
-          DD
-          <input type="number" step="0.1" value={dd} onChange={(e) => setDd(Number(e.target.value))} />
-        </label>
-        <label>
-          Juryleden
-          <input
-            type="number"
-            value={panelSize}
-            onChange={(e) => setPanelSize(Number(e.target.value))}
-          />
-        </label>
-        <button onClick={openDive}>Sprong openen</button>
-      </section>
+      <Card title="Nieuwe sprong">
+        <div className="grid cols-3" style={{ marginBottom: 14 }}>
+          <Field label="Deelnemer"><input value={diver} onChange={(e) => setDiver(e.target.value)} /></Field>
+          <Field label="DD"><input type="number" step="0.1" value={dd} onChange={(e) => setDd(Number(e.target.value))} /></Field>
+          <Field label="Juryleden"><input type="number" value={panelSize} onChange={(e) => setPanelSize(Number(e.target.value))} /></Field>
+        </div>
+        <Button icon="play" onClick={openDive}>Sprong openen</Button>
+      </Card>
 
       {diveId && (
-        <section className="controls">
-          <p className="dive">Actieve sprong: {diveId}</p>
-          <button onClick={() => send(client.makeEvent({ type: 'LockDive', diveId }))}>
-            Lock sprong
-          </button>
-          <button
-            onClick={() =>
-              send(client.makeEvent({ type: 'DeclarePenalty', diveId, penalty: { type: 'balk' } }))
-            }
-          >
-            Balk (−2)
-          </button>
-          <button
-            onClick={() =>
-              send(client.makeEvent({ type: 'DeclarePenalty', diveId, penalty: { type: 'failed' } }))
-            }
-          >
-            Mislukt (0)
-          </button>
-        </section>
+        <Card title="Actieve sprong" className="" >
+          <p className="muted" style={{ marginBottom: 12 }}>{diveId}</p>
+          <div className="row wrap">
+            <Button variant="ghost" onClick={() => send(client.makeEvent({ type: 'LockDive', diveId }))}>Lock sprong</Button>
+            <Button variant="ghost" onClick={() => send(client.makeEvent({ type: 'DeclarePenalty', diveId, penalty: { type: 'balk' } }))}>Balk (−2)</Button>
+            <Button variant="danger" onClick={() => send(client.makeEvent({ type: 'DeclarePenalty', diveId, penalty: { type: 'failed' } }))}>Mislukt (0)</Button>
+          </div>
+        </Card>
       )}
-    </main>
+    </div>
   );
 }
