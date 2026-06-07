@@ -3,9 +3,18 @@ import { Badge, Button, Card, EmptyState, Field, Logo } from '@aquameet/ui';
 import type { Category, Competition, DiveSheet, Diver, Entry, Gender } from '@aquameet/competition';
 import { ageBandLabel, formatDateRange, isDiverEligible, isOwnGroup } from '@aquameet/competition';
 import { publicApi, newId } from './public-api';
-import { parseSheetInput, validateSheet, type Discipline } from './sheet';
+import { diveDd, validateSheet, type Discipline } from './sheet';
+import type { DivePosition } from '@aquameet/rule-packs';
 
 const SHELL: React.CSSProperties = { maxWidth: 760, margin: '0 auto', padding: '40px 20px' };
+
+/** Dive positions (FINA): A straight, B pike, C tuck, D free. */
+const POSITIONS: { value: DivePosition; label: string }[] = [
+  { value: 'A', label: 'A — straight' },
+  { value: 'B', label: 'B — pike' },
+  { value: 'C', label: 'C — tuck' },
+  { value: 'D', label: 'D — free' },
+];
 
 type OpenCompetition = Pick<Competition, 'id' | 'name' | 'date' | 'endDate' | 'location' | 'registrationDeadline'>;
 
@@ -241,13 +250,30 @@ function AddProgram({ token, diver, categories, onSaved }: {
   token: string; diver: Diver; categories: Category[]; onSaved: () => void;
 }) {
   const [categoryId, setCategoryId] = useState('');
-  const [text, setText] = useState('');
+  const [rows, setRows] = useState<{ code: string; position: DivePosition }[]>([]);
   const [saving, setSaving] = useState(false);
 
   // A diver may enter their own group or an older/harder one — never a younger/easier group.
   const eligible = useMemo(() => categories.filter((c) => isDiverEligible(diver.birthYear, c)), [categories, diver.birthYear]);
   const category = eligible.find((c) => c.id === categoryId);
-  const dives = useMemo(() => parseSheetInput(text), [text]);
+
+  // One row per required dive; resize when the chosen group/event changes.
+  useEffect(() => {
+    const n = category?.rules.diveCount ?? 0;
+    setRows((prev) => {
+      const next = prev.slice(0, n);
+      while (next.length < n) next.push({ code: '', position: 'B' });
+      return next;
+    });
+  }, [category?.id, category?.rules.diveCount]);
+
+  const setRow = (i: number, patch: Partial<{ code: string; position: DivePosition }>) =>
+    setRows((prev) => prev.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+
+  const dives = useMemo(
+    () => rows.filter((r) => r.code.trim()).map((r) => ({ code: r.code.trim(), position: r.position })),
+    [rows],
+  );
   const result = useMemo(
     () => (category ? validateSheet(category.disciplineId as Discipline, dives, category.rules) : null),
     [category, dives],
@@ -261,7 +287,7 @@ function AddProgram({ token, diver, categories, onSaved }: {
       const entryId = newId();
       await publicApi.put(`/registration/${token}/entries/${entryId}`, { diverId: diver.id, categoryId: category.id });
       await publicApi.put(`/registration/${token}/sheets/${entryId}`, { dives });
-      setCategoryId(''); setText('');
+      setCategoryId(''); setRows([]);
       onSaved();
     } finally {
       setSaving(false);
@@ -286,8 +312,30 @@ function AddProgram({ token, diver, categories, onSaved }: {
       </Field>
       {category ? (
         <>
-          <Field label="Dives" hint="One per line: code position — e.g. 5253 B">
-            <textarea value={text} onChange={(e) => setText(e.target.value)} rows={7} placeholder={'101 B\n201 B\n301 B'} />
+          <Field label="Dives" hint={`${category.rules.diveCount} dives — number code + position on each line`}>
+            <div className="col" style={{ gap: 6 }}>
+              {rows.map((row, i) => {
+                const dd = diveDd(category.disciplineId as Discipline, row);
+                return (
+                  <div key={i} className="row" style={{ gap: 8, alignItems: 'center' }}>
+                    <span className="muted" style={{ width: 16, textAlign: 'right', fontSize: '0.85rem' }}>{i + 1}</span>
+                    <input
+                      style={{ flex: '1 1 0', minWidth: 0 }}
+                      inputMode="numeric"
+                      placeholder="code (e.g. 5253)"
+                      value={row.code}
+                      onChange={(e) => setRow(i, { code: e.target.value })}
+                    />
+                    <select value={row.position} onChange={(e) => setRow(i, { position: e.target.value as DivePosition })}>
+                      {POSITIONS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+                    </select>
+                    <span className="muted" style={{ width: 52, textAlign: 'right', fontSize: '0.85rem' }}>
+                      {row.code.trim() ? (dd !== undefined ? `DD ${dd.toFixed(1)}` : '—') : ''}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </Field>
           {dives.length > 0 && result ? (
             result.valid ? (

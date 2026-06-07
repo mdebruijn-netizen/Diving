@@ -34,3 +34,13 @@ export function validateSheet(discipline: Discipline, items: DiveListItem[], rul
   };
   return validateDiveSheet({ entryId: 'draft', dives: items }, rules, resolveDd);
 }
+
+/** Degree of Difficulty for a single dive, or undefined if the combination is unknown. */
+export function diveDd(discipline: Discipline, item: DiveListItem): number | undefined {
+  if (!item.code.trim()) return undefined;
+  try {
+    return lookupDd(finaDiving20172021, { discipline, code: item.code, position: item.position });
+  } catch {
+    return undefined;
+  }
+}
