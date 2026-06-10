@@ -7,4 +7,18 @@ export interface Env {
   BUCKET: R2Bucket;
   /** Stripe webhook endpoint secret. */
   STRIPE_WEBHOOK_SECRET: string;
+  /** Base64 PKCS#8 Ed25519 private key for signing entitlement docs (optional). */
+  ENTITLEMENT_PRIVATE_KEY?: string;
+}
+
+/** Per-request identity attached by the auth middleware. */
+export interface AuthContext {
+  accountId: string;
+  organizationId: string;
+  email: string;
+  role: string;
+}
+
+export interface Vars {
+  auth: AuthContext;
 }

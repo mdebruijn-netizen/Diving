@@ -21,6 +21,10 @@ export interface Competition {
   registrationOpen?: boolean;
   /** Optional ISO date after which self-registration locks. */
   registrationDeadline?: string;
+  /** Owning organisation (tenant). Legacy rows may omit this. */
+  organizationId?: string;
+  /** Public meets are listed/indexable; private meets are link/code only. */
+  isPublic?: boolean;
 }
 
 /**

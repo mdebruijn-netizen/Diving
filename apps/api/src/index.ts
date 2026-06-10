@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { adminRoutes } from './admin-routes';
+import { authRoutes } from './auth-routes';
 import { publicRoutes } from './public-routes';
 import { stripeWebhook } from './stripe-webhook';
 import type { Env } from './env';
@@ -11,6 +12,7 @@ export { SessionDO } from './session-do';
 const api = new Hono<{ Bindings: Env }>();
 
 api.get('/health', (c) => c.json({ ok: true, service: 'aquameet-api' }));
+api.route('/auth', authRoutes);
 api.route('/admin', adminRoutes);
 api.route('/public', publicRoutes);
 api.route('/webhooks', stripeWebhook);
