@@ -4,6 +4,7 @@ import { Results, Scoreboard } from './components';
 import { useSession } from './useSession';
 import { Join, RegistrationPage } from './register';
 import { Home, Pricing } from './marketing';
+import { PublicSchedule } from './schedule';
 
 function useHash(): string {
   const [hash, setHash] = useState(window.location.hash);
@@ -27,6 +28,8 @@ export function App() {
   if (hash.startsWith('#/join')) return <Join />;
   const reg = hash.match(/^#\/r\/(.+)$/);
   if (reg) return <RegistrationPage token={reg[1]!} />;
+  const sched = hash.match(/^#\/schedule\/(.+)$/);
+  if (sched) return <PublicSchedule competitionId={sched[1]!} />;
   if (hash.startsWith('#/pricing')) return <Pricing />;
   return <Home />;
 }

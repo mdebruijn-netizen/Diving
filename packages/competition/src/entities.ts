@@ -51,6 +51,24 @@ export interface Club {
   country?: string;
 }
 
+/**
+ * A scheduling block within a competition (e.g. "Morning session"). Categories
+ * are assigned to a session and ordered to form the running order / schedule.
+ */
+export interface Session {
+  id: string;
+  competitionId: string;
+  name: string;
+  /** ISO date (YYYY-MM-DD); defaults to the competition date when omitted. */
+  date?: string;
+  /** Local start time, e.g. "09:00". */
+  startTime?: string;
+  /** Local warm-up time, e.g. "08:00". */
+  warmUpTime?: string;
+  /** Position of this session within the competition. */
+  order: number;
+}
+
 export interface Diver {
   id: string;
   firstName: string;
@@ -85,6 +103,10 @@ export interface Category {
   rules: CategoryRules;
   /** Competition this category belongs to. */
   competitionId?: string;
+  /** Session this category runs in (scheduling); unscheduled when omitted. */
+  sessionId?: string;
+  /** Position within its session's running order. */
+  order?: number;
   /**
    * Birth-year band for this group. `minBirthYear` is the earliest year (the
    * oldest children); `maxBirthYear` the latest (the youngest). A diver may

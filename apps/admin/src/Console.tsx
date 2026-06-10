@@ -4,12 +4,14 @@ import { Dashboard, Stub, Validate } from './screens';
 import { Categories, Competitions, Participants, Registrations } from './manage';
 import { Enrollment } from './enroll';
 import { Billing } from './billing';
+import { Schedule } from './schedule';
 
 const NAV: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '#/' },
   { id: 'events', label: 'Competitions', icon: 'trophy', href: '#/events' },
   { id: 'participants', label: 'Participants', icon: 'users', href: '#/participants' },
   { id: 'categories', label: 'Categories', icon: 'layers', href: '#/categories' },
+  { id: 'schedule', label: 'Schedule', icon: 'layers', href: '#/schedule' },
   { id: 'enroll', label: 'Entries', icon: 'clipboard', href: '#/enroll' },
   { id: 'registrations', label: 'Sign-ups', icon: 'users', href: '#/registrations' },
   { id: 'sheets', label: 'Sheet checker', icon: 'clipboard', href: '#/sheets' },
@@ -37,6 +39,8 @@ export function Console({ session, onSignOut }: { session: Session; onSignOut: (
         return <Participants />;
       case 'categories':
         return <Categories />;
+      case 'schedule':
+        return <Schedule />;
       case 'live':
         return <Stub title="Live control" icon="broadcast" description="Open dives, follow the judges and drive the scoreboard during the meet." />;
       case 'billing':

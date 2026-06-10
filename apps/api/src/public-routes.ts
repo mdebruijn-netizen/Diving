@@ -28,6 +28,28 @@ publicRoutes.get('/competitions', async (c) => {
   );
 });
 
+/** Public schedule for a competition: ordered sessions with their categories. */
+publicRoutes.get('/competitions/:id/schedule', async (c) => {
+  const d = db(c);
+  const competition = await d.competitions.get(c.req.param('id'));
+  if (!competition) return c.notFound();
+  const [sessions, categories] = await Promise.all([
+    d.sessions.byCompetition(competition.id),
+    d.categories.byCompetition(competition.id),
+  ]);
+  const byOrder = <T extends { order?: number }>(a: T, b: T) => (a.order ?? 0) - (b.order ?? 0);
+  const schedule = [...sessions].sort(byOrder).map((s) => ({
+    session: s,
+    categories: categories.filter((cat) => cat.sessionId === s.id).sort(byOrder),
+  }));
+  const unscheduled = categories.filter((cat) => !cat.sessionId).sort(byOrder);
+  return c.json({
+    competition: { id: competition.id, name: competition.name, date: competition.date, endDate: competition.endDate, location: competition.location },
+    schedule,
+    unscheduled,
+  });
+});
+
 /** Create a registration; returns the magic-link token (shown to the user in dev mode). */
 publicRoutes.post('/register', async (c) => {
   const body = await c.req.json<{ competitionId: string; contactName: string; contactEmail: string; clubName?: string }>();

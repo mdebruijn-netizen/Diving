@@ -1,4 +1,4 @@
-import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration } from '@aquameet/competition';
+import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration, Session } from '@aquameet/competition';
 import type { Subscription } from '@aquameet/control-plane';
 import type {
   CategoryStore,
@@ -7,6 +7,7 @@ import type {
   DiverStore,
   EntryStore,
   RegistrationStore,
+  SessionStore,
   SheetStore,
 } from '@aquameet/persistence';
 
@@ -131,6 +132,20 @@ class D1CategoryStore extends D1Collection<Category> implements CategoryStore {
   }
 }
 
+class D1SessionStore extends D1Collection<Session> implements SessionStore {
+  constructor(db: D1Database) {
+    super(db, 'sessions');
+  }
+
+  async byCompetition(competitionId: string): Promise<Session[]> {
+    const res = await this.db
+      .prepare("SELECT data FROM sessions WHERE json_extract(data, '$.competitionId') = ?")
+      .bind(competitionId)
+      .all<{ data: string }>();
+    return res.results.map((r) => JSON.parse(r.data) as Session);
+  }
+}
+
 class D1SheetStore implements SheetStore {
   constructor(private readonly db: D1Database) {}
 
@@ -159,6 +174,7 @@ export class D1AppDatabase implements Database {
   readonly clubs: Collection<Club>;
   readonly divers: DiverStore;
   readonly categories: CategoryStore;
+  readonly sessions: SessionStore;
   readonly entries: EntryStore;
   readonly sheets: SheetStore;
   readonly subscriptions: Collection<Subscription>;
@@ -169,6 +185,7 @@ export class D1AppDatabase implements Database {
     this.clubs = new D1Collection<Club>(db, 'clubs');
     this.divers = new D1DiverStore(db);
     this.categories = new D1CategoryStore(db);
+    this.sessions = new D1SessionStore(db);
     this.entries = new D1EntryStore(db);
     this.sheets = new D1SheetStore(db);
     this.subscriptions = new D1Collection<Subscription>(db, 'subscriptions');

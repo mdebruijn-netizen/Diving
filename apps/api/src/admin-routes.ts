@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import type { Category, Competition, DiveSheet, Diver, Entry } from '@aquameet/competition';
+import type { Category, Competition, DiveSheet, Diver, Entry, Session } from '@aquameet/competition';
 import { buildEntitlementDoc, planFor, resolvePlanId, type Subscription } from '@aquameet/control-plane';
 import { signEntitlement, type EntitlementDoc, type SignedEntitlement } from '@aquameet/entitlements';
 import { D1AppDatabase } from './d1-database';
@@ -101,6 +101,19 @@ adminRoutes.get('/registrations/:id', async (c) => {
     (await Promise.all(entries.map(async (e) => [e.id, await d.sheets.get(e.id)] as const))).filter(([, s]) => s),
   );
   return c.json({ registration: reg, divers, entries, sheets });
+});
+
+/* ---------- Sessions (schedule structure) ---------- */
+adminRoutes.get('/competitions/:id/sessions', async (c) =>
+  c.json(await db(c).sessions.byCompetition(c.req.param('id'))),
+);
+adminRoutes.put('/sessions/:id', async (c) => {
+  await db(c).sessions.put(c.req.param('id'), await c.req.json<Session>());
+  return c.json({ ok: true });
+});
+adminRoutes.delete('/sessions/:id', async (c) => {
+  await db(c).sessions.remove(c.req.param('id'));
+  return c.json({ ok: true });
 });
 
 /* ---------- Categories ---------- */

@@ -54,6 +54,14 @@ describe('InMemoryDatabase', () => {
     expect(inA.map((e) => e.id).sort()).toEqual(['e1', 'e2']);
   });
 
+  it('queries sessions by competition', async () => {
+    const db = new InMemoryDatabase();
+    await db.sessions.put('s1', { id: 's1', competitionId: 'w1', name: 'Morning', order: 0 });
+    await db.sessions.put('s2', { id: 's2', competitionId: 'w1', name: 'Afternoon', order: 1 });
+    await db.sessions.put('s3', { id: 's3', competitionId: 'w9', name: 'Other', order: 0 });
+    expect((await db.sessions.byCompetition('w1')).map((s) => s.id).sort()).toEqual(['s1', 's2']);
+  });
+
   it('stores a dive sheet keyed by entry id', async () => {
     const db = new InMemoryDatabase();
     await db.sheets.put({ entryId: 'e1', dives: [{ code: '101', position: 'B' }] });
