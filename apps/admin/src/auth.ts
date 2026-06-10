@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react';
 export interface Session {
   email: string;
   org: string;
+  /** Bearer token for the admin API. */
+  token: string;
+  organizationId: string;
+  role: string;
 }
 
 const KEY = 'aquameet.session';
@@ -10,10 +14,16 @@ const KEY = 'aquameet.session';
 export function loadSession(): Session | null {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as Session) : null;
+    const s = raw ? (JSON.parse(raw) as Partial<Session>) : null;
+    return s && s.token ? (s as Session) : null;
   } catch {
     return null;
   }
+}
+
+/** The current bearer token, if signed in. */
+export function authToken(): string | null {
+  return loadSession()?.token ?? null;
 }
 
 export function saveSession(session: Session): void {

@@ -3,6 +3,7 @@ import { Logo } from '@aquameet/ui';
 import { Results, Scoreboard } from './components';
 import { useSession } from './useSession';
 import { Join, RegistrationPage } from './register';
+import { Home, Pricing } from './marketing';
 
 function useHash(): string {
   const [hash, setHash] = useState(window.location.hash);
@@ -15,16 +16,19 @@ function useHash(): string {
 }
 
 /**
- * Public entry component. Hash routes drive the self-registration surfaces
- * (#/join, #/r/<token>); everything else is the live results/scoreboard,
- * configured via query params (?session=ID&view=results|scoreboard).
+ * Public entry component. A live session (?session=ID) always shows the
+ * results/scoreboard. Otherwise hash routes drive the marketing site (#/,
+ * #/pricing) and the self-registration surfaces (#/join, #/r/<token>).
  */
 export function App() {
   const hash = useHash();
+  const hasSession = new URLSearchParams(window.location.search).has('session');
+  if (hasSession) return <SessionApp />;
   if (hash.startsWith('#/join')) return <Join />;
   const reg = hash.match(/^#\/r\/(.+)$/);
   if (reg) return <RegistrationPage token={reg[1]!} />;
-  return <SessionApp />;
+  if (hash.startsWith('#/pricing')) return <Pricing />;
+  return <Home />;
 }
 
 function SessionApp() {

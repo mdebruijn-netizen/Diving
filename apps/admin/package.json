@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@aquameet/competition": "workspace:*",
+    "@aquameet/control-plane": "workspace:*",
+    "@aquameet/entitlements": "workspace:*",
     "@aquameet/rule-packs": "workspace:*",
     "@aquameet/ui": "workspace:*",
     "react": "^18.3.1",

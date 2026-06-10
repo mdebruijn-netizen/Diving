@@ -19,6 +19,7 @@
     "build:all": "pnpm build:frontends && node scripts/assemble-assets.mjs",
     "build": "pnpm build:all",
     "db:migrate": "pnpm exec wrangler d1 execute aquameet --remote --file=apps/api/migrations/0001_init.sql -c apps/api/wrangler.toml",
+    "db:migrate:accounts": "pnpm exec wrangler d1 execute aquameet --remote --file=apps/api/migrations/0002_accounts.sql -c apps/api/wrangler.toml",
     "deploy": "pnpm build:all && pnpm exec wrangler deploy -c apps/api/wrangler.toml"
   },
   "devDependencies": {

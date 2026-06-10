@@ -3,6 +3,7 @@ import { useHashRoute, type Session } from './auth';
 import { Dashboard, Stub, Validate } from './screens';
 import { Categories, Competitions, Participants, Registrations } from './manage';
 import { Enrollment } from './enroll';
+import { Billing } from './billing';
 
 const NAV: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '#/' },
@@ -13,6 +14,7 @@ const NAV: NavItem[] = [
   { id: 'registrations', label: 'Sign-ups', icon: 'users', href: '#/registrations' },
   { id: 'sheets', label: 'Sheet checker', icon: 'clipboard', href: '#/sheets' },
   { id: 'live', label: 'Live', icon: 'broadcast', href: '#/live' },
+  { id: 'billing', label: 'Plan & Billing', icon: 'settings', href: '#/billing' },
   { id: 'settings', label: 'Settings', icon: 'settings', href: '#/settings' },
 ];
 
@@ -37,6 +39,8 @@ export function Console({ session, onSignOut }: { session: Session; onSignOut: (
         return <Categories />;
       case 'live':
         return <Stub title="Live control" icon="broadcast" description="Open dives, follow the judges and drive the scoreboard during the meet." />;
+      case 'billing':
+        return <Billing />;
       case 'settings':
         return <Stub title="Settings" icon="settings" description="Organization profile, subscription and team members." />;
       default:

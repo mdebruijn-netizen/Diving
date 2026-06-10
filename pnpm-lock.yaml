@@ -29,6 +29,12 @@ importers:
       '@aquameet/competition':
         specifier: workspace:*
         version: link:../../packages/competition
+      '@aquameet/control-plane':
+        specifier: workspace:*
+        version: link:../../packages/control-plane
+      '@aquameet/entitlements':
+        specifier: workspace:*
+        version: link:../../packages/entitlements
       '@aquameet/rule-packs':
         specifier: workspace:*
         version: link:../../packages/rule-packs
