@@ -1,0 +1,14 @@
+{
+  "name": "@aquameet/venue-hub",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aquameet/domain": "workspace:*",
+    "@aquameet/sync": "workspace:*"
+  }
+}

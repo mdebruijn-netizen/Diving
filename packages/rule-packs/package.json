@@ -1,0 +1,17 @@
+{
+  "name": "@aquameet/rule-packs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aquameet/domain": "workspace:*",
+    "zod": "^3.24.1"
+  }
+}

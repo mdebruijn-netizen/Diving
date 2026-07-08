@@ -1,0 +1,9 @@
+node_modules/
+dist/
+apps/api/public/
+coverage/
+.turbo/
+*.log
+.DS_Store
+.wrangler/
+.dev.vars
