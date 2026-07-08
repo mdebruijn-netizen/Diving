@@ -28,21 +28,35 @@ publicRoutes.get('/competitions', async (c) => {
   );
 });
 
-/** Public schedule for a competition: ordered sessions with their categories. */
+/** Public schedule for a competition: ordered sessions, categories and start lists. */
 publicRoutes.get('/competitions/:id/schedule', async (c) => {
   const d = db(c);
   const competition = await d.competitions.get(c.req.param('id'));
   if (!competition) return c.notFound();
-  const [sessions, categories] = await Promise.all([
+  const [sessions, categories, divers] = await Promise.all([
     d.sessions.byCompetition(competition.id),
     d.categories.byCompetition(competition.id),
+    d.divers.all(),
   ]);
+  const diverName = new Map(divers.map((v) => [v.id, `${v.firstName} ${v.lastName}`]));
   const byOrder = <T extends { order?: number }>(a: T, b: T) => (a.order ?? 0) - (b.order ?? 0);
-  const schedule = [...sessions].sort(byOrder).map((s) => ({
-    session: s,
-    categories: categories.filter((cat) => cat.sessionId === s.id).sort(byOrder),
-  }));
-  const unscheduled = categories.filter((cat) => !cat.sessionId).sort(byOrder);
+
+  // Resolve each category's running order (start list) to ordered diver names.
+  const withStartList = async (cat: (typeof categories)[number]) => {
+    const [items, entries] = await Promise.all([d.startLists.byCategory(cat.id), d.entries.byCategory(cat.id)]);
+    const diverByEntry = new Map(entries.map((e) => [e.id, e.diverId]));
+    const startList = items.map((it) => diverName.get(diverByEntry.get(it.entryId) ?? '') ?? 'Unknown').filter(Boolean);
+    return { ...cat, startList };
+  };
+  const decorate = (cats: typeof categories) => Promise.all([...cats].sort(byOrder).map(withStartList));
+
+  const schedule = await Promise.all(
+    [...sessions].sort(byOrder).map(async (s) => ({
+      session: s,
+      categories: await decorate(categories.filter((cat) => cat.sessionId === s.id)),
+    })),
+  );
+  const unscheduled = await decorate(categories.filter((cat) => !cat.sessionId));
   return c.json({
     competition: { id: competition.id, name: competition.name, date: competition.date, endDate: competition.endDate, location: competition.location },
     schedule,

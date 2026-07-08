@@ -1,4 +1,4 @@
-import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration, Session } from '@aquameet/competition';
+import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration, Session, StartListItem } from '@aquameet/competition';
 import type { Subscription } from '@aquameet/control-plane';
 import type {
   CategoryStore,
@@ -9,6 +9,7 @@ import type {
   RegistrationStore,
   SessionStore,
   SheetStore,
+  StartListStore,
 } from './types';
 
 class MemoryCollection<T> implements Collection<T> {
@@ -55,6 +56,16 @@ class MemorySessionStore extends MemoryCollection<Session> implements SessionSto
   }
 }
 
+class MemoryStartListStore extends MemoryCollection<StartListItem> implements StartListStore {
+  async byCategory(categoryId: string): Promise<StartListItem[]> {
+    return (await this.all()).filter((s) => s.categoryId === categoryId).sort((a, b) => a.order - b.order);
+  }
+  async replaceForCategory(categoryId: string, items: StartListItem[]): Promise<void> {
+    for (const s of await this.byCategory(categoryId)) await this.remove(s.id);
+    for (const s of items) await this.put(s.id, s);
+  }
+}
+
 class MemoryRegistrationStore extends MemoryCollection<Registration> implements RegistrationStore {
   async byToken(token: string): Promise<Registration | undefined> {
     return (await this.all()).find((r) => r.token === token);
@@ -83,6 +94,7 @@ export class InMemoryDatabase implements Database {
   readonly divers = new MemoryDiverStore();
   readonly categories = new MemoryCategoryStore();
   readonly sessions = new MemorySessionStore();
+  readonly startLists = new MemoryStartListStore();
   readonly entries = new MemoryEntryStore();
   readonly sheets = new MemorySheetStore();
   readonly subscriptions = new MemoryCollection<Subscription>();
