@@ -11,7 +11,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p packages/ui/tsconfig.json && tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/venue-hub/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json && tsc --noEmit -p apps/judge/tsconfig.json && tsc --noEmit -p apps/admin/tsconfig.json",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p packages/ui/tsconfig.json && tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/api/tsconfig.test.json && tsc --noEmit -p apps/venue-hub/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json && tsc --noEmit -p apps/judge/tsconfig.json && tsc --noEmit -p apps/admin/tsconfig.json",
     "build:web": "pnpm --filter @aquameet/web build",
     "build:judge": "pnpm --filter @aquameet/judge build",
     "build:admin": "pnpm --filter @aquameet/admin build",
@@ -21,16 +22,24 @@
     "db:migrate": "pnpm exec wrangler d1 execute aquameet --remote --file=apps/api/migrations/0001_init.sql -c apps/api/wrangler.toml",
     "db:migrate:accounts": "pnpm exec wrangler d1 execute aquameet --remote --file=apps/api/migrations/0002_accounts.sql -c apps/api/wrangler.toml",
     "db:migrate:sessions": "pnpm exec wrangler d1 execute aquameet --remote --file=apps/api/migrations/0003_sessions.sql -c apps/api/wrangler.toml",
+    "db:migrate:startlists": "pnpm exec wrangler d1 execute aquameet --remote --file=apps/api/migrations/0004_start_lists.sql -c apps/api/wrangler.toml",
     "deploy": "pnpm build:all && pnpm exec wrangler deploy -c apps/api/wrangler.toml"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.10.2",
+    "eslint": "^10.6.0",
     "fast-check": "^3.23.2",
+    "globals": "^17.7.0",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.63.0",
     "vitest": "^3.0.5",
     "wrangler": "^4.42.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "workerd"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
   }
 }

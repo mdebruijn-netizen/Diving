@@ -5,6 +5,7 @@ import { Categories, Competitions, Participants, Registrations } from './manage'
 import { Enrollment } from './enroll';
 import { Billing } from './billing';
 import { Schedule } from './schedule';
+import { StartLists } from './startlists';
 
 const NAV: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', href: '#/' },
@@ -13,6 +14,7 @@ const NAV: NavItem[] = [
   { id: 'categories', label: 'Categories', icon: 'layers', href: '#/categories' },
   { id: 'schedule', label: 'Schedule', icon: 'layers', href: '#/schedule' },
   { id: 'enroll', label: 'Entries', icon: 'clipboard', href: '#/enroll' },
+  { id: 'startlists', label: 'Start lists', icon: 'clipboard', href: '#/startlists' },
   { id: 'registrations', label: 'Sign-ups', icon: 'users', href: '#/registrations' },
   { id: 'sheets', label: 'Sheet checker', icon: 'clipboard', href: '#/sheets' },
   { id: 'live', label: 'Live', icon: 'broadcast', href: '#/live' },
@@ -41,6 +43,8 @@ export function Console({ session, onSignOut }: { session: Session; onSignOut: (
         return <Categories />;
       case 'schedule':
         return <Schedule />;
+      case 'startlists':
+        return <StartLists />;
       case 'live':
         return <Stub title="Live control" icon="broadcast" description="Open dives, follow the judges and drive the scoreboard during the meet." />;
       case 'billing':
