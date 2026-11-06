@@ -4,10 +4,12 @@ import type { Category, Session } from '@aquameet/competition';
 import { ageBandLabel, formatDateRange } from '@aquameet/competition';
 import { publicApi } from './public-api';
 
+type ScheduledCategory = Category & { startList?: string[] };
+
 interface ScheduleData {
   competition: { id: string; name: string; date: string; endDate?: string; location?: string };
-  schedule: { session: Session; categories: Category[] }[];
-  unscheduled: Category[];
+  schedule: { session: Session; categories: ScheduledCategory[] }[];
+  unscheduled: ScheduledCategory[];
 }
 
 const SHELL: React.CSSProperties = { maxWidth: 760, margin: '0 auto', padding: '40px 20px' };
@@ -44,17 +46,23 @@ export function PublicSchedule({ competitionId }: { competitionId: string }) {
             {categories.length === 0 ? (
               <p className="muted">No events yet.</p>
             ) : (
-              <table className="table">
-                <tbody>
-                  {categories.map((c, i) => (
-                    <tr key={c.id}>
-                      <td style={{ width: 28 }} className="dim">{i + 1}</td>
-                      <td><b>{c.name}</b></td>
-                      <td className="dim">{c.gender} · {c.rules.diveCount} dives{ageBandLabel(c) ? ` · ${ageBandLabel(c)}` : ''}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="col" style={{ gap: 14 }}>
+                {categories.map((c) => (
+                  <div key={c.id}>
+                    <div className="row between">
+                      <b>{c.name}</b>
+                      <span className="dim" style={{ fontSize: '0.85rem' }}>{c.gender} · {c.rules.diveCount} dives{ageBandLabel(c) ? ` · ${ageBandLabel(c)}` : ''}</span>
+                    </div>
+                    {c.startList && c.startList.length > 0 ? (
+                      <ol style={{ margin: '6px 0 0', paddingLeft: 22 }}>
+                        {c.startList.map((name, i) => <li key={i} className="dim">{name}</li>)}
+                      </ol>
+                    ) : (
+                      <p className="muted" style={{ margin: '4px 0 0', fontSize: '0.82rem' }}>Start list not published yet.</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
           </Card>
         ))

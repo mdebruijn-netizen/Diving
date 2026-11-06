@@ -1,4 +1,4 @@
-import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration, Session } from '@aquameet/competition';
+import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration, Session, StartListItem } from '@aquameet/competition';
 import type { Subscription } from '@aquameet/control-plane';
 
 /**
@@ -35,6 +35,13 @@ export interface SessionStore extends Collection<Session> {
   byCompetition(competitionId: string): Promise<Session[]>;
 }
 
+export interface StartListStore extends Collection<StartListItem> {
+  /** Running-order items for a category. */
+  byCategory(categoryId: string): Promise<StartListItem[]>;
+  /** Replace a category's running order in one shot (idempotent regeneration). */
+  replaceForCategory(categoryId: string, items: StartListItem[]): Promise<void>;
+}
+
 export interface RegistrationStore extends Collection<Registration> {
   /** Look up a registration by its magic-link token. */
   byToken(token: string): Promise<Registration | undefined>;
@@ -54,6 +61,7 @@ export interface Database {
   divers: DiverStore;
   categories: CategoryStore;
   sessions: SessionStore;
+  startLists: StartListStore;
   entries: EntryStore;
   sheets: SheetStore;
   /** Subscriptions keyed by tenantId. */

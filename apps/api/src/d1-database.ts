@@ -1,4 +1,4 @@
-import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration, Session } from '@aquameet/competition';
+import type { Category, Club, Competition, DiveSheet, Diver, Entry, Registration, Session, StartListItem } from '@aquameet/competition';
 import type { Subscription } from '@aquameet/control-plane';
 import type {
   CategoryStore,
@@ -9,6 +9,7 @@ import type {
   RegistrationStore,
   SessionStore,
   SheetStore,
+  StartListStore,
 } from '@aquameet/persistence';
 
 /**
@@ -146,6 +147,35 @@ class D1SessionStore extends D1Collection<Session> implements SessionStore {
   }
 }
 
+class D1StartListStore extends D1Collection<StartListItem> implements StartListStore {
+  constructor(db: D1Database) {
+    super(db, 'start_lists');
+  }
+
+  override async put(id: string, value: StartListItem): Promise<void> {
+    await this.db
+      .prepare(
+        `INSERT INTO start_lists (id, category_id, data) VALUES (?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET category_id = excluded.category_id, data = excluded.data`,
+      )
+      .bind(id, value.categoryId, JSON.stringify(value))
+      .run();
+  }
+
+  async byCategory(categoryId: string): Promise<StartListItem[]> {
+    const res = await this.db
+      .prepare('SELECT data FROM start_lists WHERE category_id = ?')
+      .bind(categoryId)
+      .all<{ data: string }>();
+    return res.results.map((r) => JSON.parse(r.data) as StartListItem).sort((a, b) => a.order - b.order);
+  }
+
+  async replaceForCategory(categoryId: string, items: StartListItem[]): Promise<void> {
+    await this.db.prepare('DELETE FROM start_lists WHERE category_id = ?').bind(categoryId).run();
+    for (const s of items) await this.put(s.id, s);
+  }
+}
+
 class D1SheetStore implements SheetStore {
   constructor(private readonly db: D1Database) {}
 
@@ -175,6 +205,7 @@ export class D1AppDatabase implements Database {
   readonly divers: DiverStore;
   readonly categories: CategoryStore;
   readonly sessions: SessionStore;
+  readonly startLists: StartListStore;
   readonly entries: EntryStore;
   readonly sheets: SheetStore;
   readonly subscriptions: Collection<Subscription>;
@@ -186,6 +217,7 @@ export class D1AppDatabase implements Database {
     this.divers = new D1DiverStore(db);
     this.categories = new D1CategoryStore(db);
     this.sessions = new D1SessionStore(db);
+    this.startLists = new D1StartListStore(db);
     this.entries = new D1EntryStore(db);
     this.sheets = new D1SheetStore(db);
     this.subscriptions = new D1Collection<Subscription>(db, 'subscriptions');

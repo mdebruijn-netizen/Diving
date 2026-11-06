@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import type { Category, Competition, DiveSheet, Diver, Entry, Session } from '@aquameet/competition';
+import type { Category, Competition, DiveSheet, Diver, Entry, Session, StartListItem } from '@aquameet/competition';
 import { buildEntitlementDoc, planFor, resolvePlanId, type Subscription } from '@aquameet/control-plane';
 import { signEntitlement, type EntitlementDoc, type SignedEntitlement } from '@aquameet/entitlements';
 import { D1AppDatabase } from './d1-database';
@@ -140,6 +140,16 @@ adminRoutes.put('/divers/:id', async (c) => {
 adminRoutes.delete('/divers/:id', async (c) => {
   await db(c).divers.remove(c.req.param('id'));
   return c.json({ ok: true });
+});
+
+/* ---------- Start lists (running order per category) ---------- */
+adminRoutes.get('/categories/:id/startlist', async (c) => c.json(await db(c).startLists.byCategory(c.req.param('id'))));
+adminRoutes.put('/categories/:id/startlist', async (c) => {
+  const categoryId = c.req.param('id');
+  const body = await c.req.json<{ items: { entryId: string; order: number }[] }>();
+  const items: StartListItem[] = body.items.map((it) => ({ id: crypto.randomUUID(), categoryId, entryId: it.entryId, order: it.order }));
+  await db(c).startLists.replaceForCategory(categoryId, items);
+  return c.json({ ok: true, count: items.length });
 });
 
 /* ---------- Entries ---------- */
